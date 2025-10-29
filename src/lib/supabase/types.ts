@@ -1,10 +1,9 @@
-// Database types will be generated from your Supabase schema
-// For now, we'll use basic types
+// Database types for auth functionality only
+// All database-related types have been removed
 
 export interface User {
   id: string
   email: string
-  role: 'admin' | 'user'
   created_at: string
   updated_at: string
 }
@@ -13,6 +12,13 @@ export interface AuthUser {
   id: string
   email?: string
   user_metadata?: {
-    role?: string
+    [key: string]: any
   }
+}
+
+export interface AuthSession {
+  access_token: string
+  refresh_token: string
+  expires_at?: number
+  user: AuthUser
 }

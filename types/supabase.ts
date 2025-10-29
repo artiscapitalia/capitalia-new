@@ -1,52 +1,33 @@
-// Database types for Capitalia Web
+// Database types for Capitalia Web - Auth Only
+// All database tables and functions have been removed
+
 export interface Database {
   public: {
     Tables: {
-      languages: {
-        Row: {
-          id: string
-          name: string
-          code: string
-          native_name: string | null
-          is_active: boolean
-          sort_order: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          code: string
-          native_name?: string | null
-          is_active?: boolean
-          sort_order?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          code?: string
-          native_name?: string | null
-          is_active?: boolean
-          sort_order?: number
-          created_at?: string
-          updated_at?: string
-        }
-      }
+      // No custom tables - only Supabase auth tables remain
     }
     Views: {
-      // Add your view types here when you generate them
+      // No custom views
     }
     Functions: {
-      // Add your function types here when you generate them
+      // No custom functions
     }
     Enums: {
-      // Add your enum types here when you generate them
+      // No custom enums
     }
   }
 }
 
-export type Language = Database['public']['Tables']['languages']['Row']
-export type LanguageInsert = Database['public']['Tables']['languages']['Insert']
-export type LanguageUpdate = Database['public']['Tables']['languages']['Update']
+// Basic auth types for admin functionality
+export interface AuthUser {
+  id: string
+  email?: string
+  created_at?: string
+}
+
+export interface AuthSession {
+  access_token: string
+  refresh_token: string
+  expires_at?: number
+  user: AuthUser
+}

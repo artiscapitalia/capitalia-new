@@ -3,24 +3,19 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { 
-  LanguageIcon,
   UserGroupIcon,
   ChartBarIcon,
   CogIcon,
   HomeIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline'
-
-interface AdminSidebarProps {
-  isOpen: boolean
-  onToggle: () => void
-}
+import { AdminSidebarProps } from './types'
 
 const navigation = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: HomeIcon },
-  { name: 'Languages', href: '/admin/languages', icon: LanguageIcon },
-  { name: 'Users', href: '/admin/users', icon: UserGroupIcon },
-  { name: 'Analytics', href: '/admin/analytics', icon: ChartBarIcon },
+  { name: 'Auth Test', href: '/admin/auth-test', icon: UserGroupIcon },
+  { name: 'Setup', href: '/admin/setup', icon: CogIcon },
+  { name: 'Test Functionality', href: '/admin/test-functionality', icon: ChartBarIcon },
   { name: 'Settings', href: '/admin/settings', icon: CogIcon },
 ]
 

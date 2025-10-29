@@ -1,59 +1,219 @@
-Expertise: You are an expert in modern web development, specializing in JavaScript, TypeScript, CSS, React, Tailwind CSS, Node.js, and Next.js (App Router and Pages Router). You prioritize selecting optimal tools and libraries, avoiding redundancy and complexity, while ensuring compatibility with Next.js’s server-first architecture. Justify tool choices based on project requirements, performance, and maintainability.Code Review: Before making suggestions, perform a thorough review of the existing codebase, referencing specific files (e.g., @app/page.tsx). Provide accurate, concise suggestions in incremental steps, including:
-- Explanation of the change and its purpose.
-- Minimal code snippet.
-- Targeted test to validate the change.
-- Expected outcomes and edge cases.
-- Request clarification for missing context via @ references or status.md.
+# Capitalia Project Rules
 
-Security: Prioritize security to prevent vulnerabilities (e.g., XSS, CSRF). For high-risk areas (e.g., user input, authentication), conduct a mandatory <SECURITY_REVIEW> with:
-- Vulnerability identification.
-- Mitigation strategies (e.g., zod for validation).
-- OWASP or Next.js references.
-- Test to verify mitigation.
-- Use secure defaults (e.g., helmet, zod) and avoid unsafe practices (e.g., eval).
+## Folder Structure and Organization
 
-Performance and Robustness: Optimize for performance, reliability, and scalability:
-- Minimize re-renders, bundle size, and server load (e.g., React.memo, ISR).
-- Implement try-catch for API calls, user-friendly error messages, and error logging.
-- Address edge cases (e.g., empty states, network failures).
-- Measure performance with Lighthouse or @next/bundle-analyzer.
-- Document trade-offs in comments or status.md.
+### Public vs Admin Separation
 
-Operational Concerns: Ensure code is production-ready, addressing:
-- Hosting: Compatibility with Vercel, AWS, or Netlify.
-- Management: Use .env.local for configuration.
-- Monitoring: Integrate logging (e.g., Sentry for prod).
-- Maintenance: Write self-documenting code, update status.md, and run npm audit.
+**CRITICAL**: All admin-related functionality, page content editing features, and administrative components MUST be placed in dedicated "admin" folders. Maintain clear separation between public and admin sections.
 
-Coding Standards:
-- Use early returns for readability.
-- Style with Tailwind CSS, mobile-first. Avoid inline CSS unless justified.
-- Use functional, declarative TypeScript code. Avoid classes. Define types/interfaces.
-- Use descriptive names with auxiliary verbs (e.g., isLoading). Prefix event handlers with handle (e.g., handleClick).
-- Use const arrow functions with types (e.g., const toggle: () => void = () =>).
-- Minimize 'use client', useEffect, and useState. Favor React Server Components.
-- Wrap client components in <Suspense> with lightweight fallbacks.
-- Use next/dynamic for non-critical components (ssr: false for client-only).
-- Optimize images with next/image (WebP, explicit sizes, loading="lazy").
-- Follow Next.js docs for data fetching, rendering, and routing.
-- Include try-catch and fallback UI for errors.
-- Use React.memo and analyze bundle size.
+### Public Sections
 
-Supabase and Database: Use Supabase for all database operations and real-time features:
-- Use the Supabase client for database interactions and real-time subscriptions.
-- Implement Row Level Security (RLS) policies for fine-grained access control.
-- Use Supabase Auth for user authentication and management.
-- Leverage Supabase Storage for file uploads and management.
-- Use Supabase Edge Functions for serverless API endpoints when needed.
-- Use the generated GraphQL client (Genql) for type-safe API interactions with Supabase.
-- Optimize GraphQL queries to fetch only necessary data.
-- Use Genql queries for fetching large datasets efficiently.
-- Implement proper authentication and authorization using Supabase RLS and Policies.
-- Always use TypeScript types generated from Supabase schema.
-- Handle Supabase errors gracefully with proper error boundaries and user feedback.
-- Migration files are located into "migrations" folder
+- **`src/app/`**: Public page routes and layouts
+  - Use this for all public-facing pages (landing pages, content pages, etc.)
+  - Example: `src/app/[lang]/[...slug]/page.tsx`
 
-Admin:
-- Related files to admin is located into seperate folder "admin", e.g. "src/components/admin", "src/lib/admin", etc.
+- **`src/app/api/`**: Public API routes
+  - API endpoints accessible to public users
+  - Example: `src/app/api/public/route.ts`
 
-Feedback: Adapt suggestions based on user feedback, tracked in status.md or code comments. Address recurring issues with simpler or alternative solutions. Clarify ambiguous feedback via @ references.Uncertainty: If no clear answer exists, state: "No definitive solution is available." If unknown, say: "I lack sufficient information. Please provide details (e.g., @app/page.tsx)." Suggest next steps (e.g., consult Next.js docs).
+- **`src/components/page/`**: Public page components
+  - **CRITICAL**: Each public page component MUST be organized in its own folder
+  - Components are grouped by feature/functionality in subfolders
+  - Each component folder follows the standard structure pattern (types.ts, utils.ts, component files)
+  - Example structure:
+    ```
+    src/components/page/
+      ├── intro/
+      │   ├── Intro.tsx
+      │   ├── types.ts
+      │   ├── utils.ts (if needed)
+      │   └── index.ts
+      ├── about-us/
+      │   ├── AboutUs.tsx
+      │   ├── types.ts
+      │   └── index.ts
+      ├── header.tsx (simple single-file components)
+      └── index.ts (exports all page components)
+    ```
+  - Examples:
+    - `src/components/page/intro/Intro.tsx`
+    - `src/components/page/about-us/AboutUs.tsx`
+
+- **`src/lib/`**: Shared helper functions, configurations, utilities
+  - Used by both public and admin sections
+  - Example: `src/lib/supabase/client.ts`
+  - Example: `src/lib/auth/AuthContext.tsx`
+
+- **`src/contexts/`**: React contexts (shared)
+  - Shared React contexts used across the application
+  - Example: `src/contexts/AlertContext.tsx`
+
+- **`src/hooks/`**: Custom React hooks (shared)
+  - Custom hooks that can be used in both public and admin sections
+
+- **`src/types/`**: TypeScript interfaces and types (shared)
+  - Shared TypeScript type definitions
+  - Example: `src/types/supabase.ts`
+
+- **`src/utils/`**: General utilities (dates, formatting, etc.)
+  - Utility functions for general use cases
+  - Example: `src/utils/dateFormatter.ts`
+
+- **`src/templates/`**: Template files for public pages
+  - **CRITICAL**: Template file paths MUST mirror the URL path structure
+  - Each template represents a page route and follows the language/section hierarchy
+  - Template path structure: `src/templates/{lang}/{section}/{page-name}.tsx`
+  - URL to template mapping:
+    - URL: `/lv/finansejums/finansejums-uznemumam`
+    - Template: `src/templates/lv/finansejums/finansejums-uznemumam.tsx`
+    - URL: `/en/business/business-financing`
+    - Template: `src/templates/en/business/business-financing.tsx`
+  - Templates compose page components from `src/components/page/` and provide template-specific content overrides
+  - Templates use `InlineEditProvider` to enable inline editing capabilities
+  - Templates must include `EditModeToggle` component for admin users
+  - Example: `src/templates/lv/finansejums/finansejums-uznemumam.tsx`
+    ```typescript
+    import { Intro } from '@/components/page'
+    import { InlineEditProvider } from '@/lib/admin/InlineEditContext'
+    import { EditModeToggle } from '@/components/admin/edit-mode'
+    
+    // Template composes page components
+    ```
+
+### Admin Sections
+
+- **`src/app/admin/`**: Admin-only page routes
+  - All admin pages and dashboard routes
+  - Example: `src/app/admin/dashboard/page.tsx`
+  - Example: `src/app/admin/settings/page.tsx`
+
+- **`src/app/api/admin/`**: Admin-only API routes
+  - Protected API endpoints for admin functionality
+  - Example: `src/app/api/admin/templates/save/route.ts`
+
+- **`src/components/admin/`**: Admin-only React components
+  - Components exclusively used in admin sections
+  - Example: `src/components/admin/AdminLayout.tsx`
+  - If a component consists of multiple files, create a subfolder:
+    - Example: `src/components/admin/edit-mode/EditableText.tsx`
+    - Example: `src/components/admin/edit-mode/EditModeToggle.tsx`
+
+- **`src/lib/admin/`**: Admin-only helper functions, configurations, utilities
+  - Utility functions, contexts, and helpers used ONLY by admin
+  - Example: `src/lib/admin/InlineEditContext.tsx`
+
+## Code Organization and Separation of Concerns
+
+### Mandatory Separation of Functions, Interfaces, and Utilities
+
+**CRITICAL RULE**: Functions, interfaces/types, and utilities MUST always be separated into individual `.ts` files. React components should import these from their dedicated files.
+
+#### Structure Pattern
+
+For each feature or component area (both admin and public page components), organize as follows:
+
+**Admin components:**
+```
+src/components/admin/edit-mode/
+  ├── EditableText.tsx          # React component
+  ├── EditModeToggle.tsx        # React component
+  ├── types.ts                  # Interfaces and types
+  ├── utils.ts                  # Utility functions
+  ├── hooks.ts                  # Custom hooks (if needed)
+  └── index.ts                  # Exports
+```
+
+**Public page components:**
+```
+src/components/page/intro/
+  ├── Intro.tsx                 # React component
+  ├── types.ts                  # Interfaces and types
+  ├── utils.ts                  # Utility functions (if needed)
+  └── index.ts                  # Exports
+```
+
+#### Examples
+
+**DO**:
+- Define interfaces in separate `types.ts` files
+  ```typescript
+  // src/components/admin/edit-mode/types.ts
+  export interface EditableTextProps {
+    componentId: string;
+    elementId: string;
+    defaultContent: string;
+  }
+  ```
+
+- Define utility functions in separate `utils.ts` files
+  ```typescript
+  // src/components/admin/edit-mode/utils.ts
+  export const formatEditContent = (content: string): string => {
+    // implementation
+  }
+  ```
+
+- Components import from these files
+  ```typescript
+  // src/components/admin/edit-mode/EditableText.tsx
+  import { EditableTextProps } from './types';
+  import { formatEditContent } from './utils';
+  ```
+
+**DON'T**:
+- Define interfaces directly in component files
+- Define utility functions directly in component files
+- Mix business logic with UI components
+
+### Code Reusability and Duplicate Prevention
+
+**MANDATORY**: Before creating any new functionality:
+
+1. **Check Existing Code**: Search the codebase for existing functions, interfaces, or utilities that might already solve your need
+   - Search in `src/lib/` for shared utilities
+   - Search in `src/lib/admin/` for admin utilities
+   - Search in `src/components/admin/` for existing admin components
+   - Search in `src/types/` for existing type definitions
+
+2. **Reuse Before Creating**: Always prefer reusing existing code over creating duplicates
+   - Import and extend existing functions/interfaces
+   - Create wrapper functions if slight modifications are needed
+   - Document why a new function is needed if similar ones exist
+
+3. **Naming Conventions**: Use consistent, descriptive names
+   - Prefix admin utilities with `admin` if there's potential confusion
+   - Use clear, searchable function names
+   - Follow existing patterns in the codebase
+
+## Additional Guidelines
+
+### Component Organization
+
+- Use index files (`index.ts`) for clean exports when a component consists of multiple files
+  - Example: `src/components/page/index.ts` exports all page components
+
+### Type Definitions
+
+- Always use TypeScript types/interfaces
+- Generate types from Supabase schema when applicable (see `types/supabase.ts`)
+- Keep type definitions close to their usage but separate from implementation
+
+### File Naming
+
+- Use PascalCase for React components: `EditableText.tsx`
+- Use camelCase for utility files: `utils.ts`, `helpers.ts`
+- Use camelCase for type files: `types.ts`
+- Use kebab-case for route files (Next.js convention): `page.tsx`, `route.ts`
+
+### Import Paths
+
+- Use `@/` alias for imports from `src/` directory
+- Example: `import { useInlineEdit } from '@/lib/admin/InlineEditContext'`
+
+## Migration Notes
+
+When refactoring existing code:
+1. Extract interfaces/types to separate `types.ts` files
+2. Extract utility functions to separate `utils.ts` files
+3. Update imports in components
+4. Ensure no functionality is broken during refactoring

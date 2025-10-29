@@ -4,32 +4,32 @@ import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { AdminLayout } from '@/components/admin/AdminLayout'
 import Link from 'next/link'
 import { 
-  LanguageIcon,
   UserGroupIcon,
   ChartBarIcon,
-  CogIcon
+  CogIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline'
 
 export default function AdminDashboard() {
   const dashboardItems = [
     {
-      name: 'Languages',
-      description: 'Manage application languages',
-      href: '/admin/languages',
-      icon: LanguageIcon,
-      color: 'bg-blue-500'
-    },
-    {
-      name: 'Users',
-      description: 'Manage user accounts',
-      href: '/admin/users',
+      name: 'Auth Test',
+      description: 'Test authentication functionality',
+      href: '/admin/auth-test',
       icon: UserGroupIcon,
       color: 'bg-indigo-500'
     },
     {
-      name: 'Analytics',
-      description: 'View system analytics',
-      href: '/admin/analytics',
+      name: 'Setup',
+      description: 'Initial system setup',
+      href: '/admin/setup',
+      icon: CogIcon,
+      color: 'bg-blue-500'
+    },
+    {
+      name: 'Test Functionality',
+      description: 'Test various system functions',
+      href: '/admin/test-functionality',
       icon: ChartBarIcon,
       color: 'bg-green-500'
     },
@@ -44,7 +44,7 @@ export default function AdminDashboard() {
 
   return (
     <ProtectedRoute requireAdmin={true}>
-      <AdminLayout title="Dashboard" subtitle="Admin panel overview">
+      <AdminLayout title="Dashboard" subtitle="Admin panel overview (Auth only)">
         <div className="space-y-6">
           {/* Welcome section */}
           <div className="bg-white rounded-lg shadow p-6">
@@ -52,7 +52,7 @@ export default function AdminDashboard() {
               Welcome to the Admin Dashboard
             </h2>
             <p className="text-gray-600">
-              Manage your application from the navigation sidebar or use the quick access cards below.
+              This is a simplified admin panel with authentication only. All database functionality has been removed.
             </p>
           </div>
 
@@ -85,21 +85,21 @@ export default function AdminDashboard() {
             ))}
           </div>
 
-          {/* Stats section */}
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {/* System Status */}
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="p-5">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <LanguageIcon className="h-8 w-8 text-blue-500" />
+                    <ShieldCheckIcon className="h-8 w-8 text-green-500" />
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">
-                        Total Languages
+                        Authentication
                       </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        -
+                      <dd className="text-lg font-medium text-green-600">
+                        Active
                       </dd>
                     </dl>
                   </div>
@@ -111,35 +111,15 @@ export default function AdminDashboard() {
               <div className="p-5">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <UserGroupIcon className="h-8 w-8 text-indigo-500" />
+                    <ChartBarIcon className="h-8 w-8 text-blue-500" />
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">
-                        Total Users
+                        Database
                       </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        -
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <ChartBarIcon className="h-8 w-8 text-green-500" />
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Active Sessions
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        -
+                      <dd className="text-lg font-medium text-red-600">
+                        Disabled
                       </dd>
                     </dl>
                   </div>
