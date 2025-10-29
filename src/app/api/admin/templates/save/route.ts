@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readTemplateContent, saveTemplateContent } from '@/lib/admin/templateStorage'
+import { createTemplateWithWrapper } from '@/components/admin/edit-mode/TemplateWrapper'
 import { readFile } from 'fs/promises'
 import { join } from 'path'
 
@@ -36,23 +37,33 @@ export async function POST(request: NextRequest) {
       
       // If not found in storage/blob, try to read from source file as fallback
       if (!existingContent) {
-        try {
-          const templateFilePath = join(process.cwd(), 'src', 'templates', templatePath)
-          console.log('Reading template from file:', templateFilePath)
-          console.log('Current working directory:', process.cwd())
-          existingContent = await readFile(templateFilePath, 'utf-8')
-          console.log('Successfully read template file')
-        } catch (fileError: unknown) {
-          console.error('Error reading template file:', fileError)
-          const errorMessage = fileError instanceof Error ? fileError.message : String(fileError)
-          return NextResponse.json(
-            { 
-              error: 'Template file not found',
-              details: errorMessage,
-              path: join(process.cwd(), 'src', 'templates', templatePath)
-            },
-            { status: 404 }
-          )
+        const isVercel = !!process.env.VERCEL && process.env.VERCEL === '1'
+        
+        if (isVercel) {
+          // On Vercel, if blob doesn't exist and we can't read from filesystem,
+          // create a new template structure from scratch
+          console.log('Creating new template on Vercel from scratch')
+          existingContent = createTemplateFromScratch(templatePath, content, addedComponents)
+        } else {
+          // Locally, try to read from filesystem
+          try {
+            const templateFilePath = join(process.cwd(), 'src', 'templates', templatePath)
+            console.log('Reading template from file:', templateFilePath)
+            console.log('Current working directory:', process.cwd())
+            existingContent = await readFile(templateFilePath, 'utf-8')
+            console.log('Successfully read template file')
+          } catch (fileError: unknown) {
+            console.error('Error reading template file:', fileError)
+            const errorMessage = fileError instanceof Error ? fileError.message : String(fileError)
+            return NextResponse.json(
+              { 
+                error: 'Template file not found',
+                details: errorMessage,
+                path: join(process.cwd(), 'src', 'templates', templatePath)
+              },
+              { status: 404 }
+            )
+          }
         }
       }
       
@@ -95,6 +106,18 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+/**
+ * Create a template from scratch when blob doesn't exist on Vercel
+ * Uses TemplateWrapper structure for minimal boilerplate
+ */
+function createTemplateFromScratch(
+  templatePath: string,
+  content: { [componentId: string]: { [elementId: string]: string } },
+  addedComponents: AddedComponent[]
+): string {
+  return createTemplateWithWrapper(templatePath, content, addedComponents)
 }
 
 function updateTemplateContent(

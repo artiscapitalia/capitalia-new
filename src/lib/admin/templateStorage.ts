@@ -80,13 +80,9 @@ export async function readTemplateContent(templatePath: string): Promise<string 
     // Read from Vercel Blob Storage
     const blobFunctions = await getBlobFunctions()
     if (!blobFunctions) {
-      // Fallback to file if blob functions not available
-      const templateFilePath = join(process.cwd(), 'src', 'templates', templatePath)
-      try {
-        return await readFile(templateFilePath, 'utf-8')
-      } catch {
-        return null
-      }
+      // On Vercel, if blob functions not available, return null
+      // We can't read from filesystem on Vercel (read-only)
+      return null
     }
     
     const blobPath = getBlobPath(templatePath)
@@ -108,17 +104,20 @@ export async function readTemplateContent(templatePath: string): Promise<string 
       
       return await response.text()
     } catch (error: unknown) {
-      // If blob doesn't exist, return null (will fallback to file)
+      // If blob doesn't exist, return null (will create from scratch on save)
       const isBlobNotFound = error && 
         typeof error === 'object' && 
         ('name' in error && error.name === 'BlobNotFoundError' ||
-         'status' in error && error.status === 404 ||
-         'code' in error && error.code === 'ENOENT')
+         'status' in error && (error.status === 404 || error.status === '404') ||
+         'code' in error && (error.code === 'ENOENT' || error.code === 'NOT_FOUND'))
       
       if (isBlobNotFound) {
+        console.log('Blob not found, will create template from scratch:', blobPath)
         return null
       }
-      throw error
+      // For other errors, log but don't throw - let save route handle it
+      console.error('Error reading blob (non-critical, will create from scratch):', error)
+      return null
     }
   } else {
     // Read from local filesystem
