@@ -47,7 +47,10 @@ export async function POST(request: NextRequest) {
         } else {
           // Locally, try to read from filesystem
           try {
-            const templateFilePath = join(process.cwd(), 'src', 'templates', templatePath)
+            // Ensure templatePath has .tsx extension
+            const templateFilePath = templatePath.endsWith('.tsx') 
+              ? join(process.cwd(), 'src', 'templates', templatePath)
+              : join(process.cwd(), 'src', 'templates', `${templatePath}.tsx`)
             console.log('Reading template from file:', templateFilePath)
             console.log('Current working directory:', process.cwd())
             existingContent = await readFile(templateFilePath, 'utf-8')
@@ -55,11 +58,14 @@ export async function POST(request: NextRequest) {
           } catch (fileError: unknown) {
             console.error('Error reading template file:', fileError)
             const errorMessage = fileError instanceof Error ? fileError.message : String(fileError)
+            const templateFilePath = templatePath.endsWith('.tsx') 
+              ? join(process.cwd(), 'src', 'templates', templatePath)
+              : join(process.cwd(), 'src', 'templates', `${templatePath}.tsx`)
             return NextResponse.json(
               { 
                 error: 'Template file not found',
                 details: errorMessage,
-                path: join(process.cwd(), 'src', 'templates', templatePath)
+                path: templateFilePath
               },
               { status: 404 }
             )

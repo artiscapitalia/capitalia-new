@@ -53,7 +53,10 @@ export async function saveTemplateContent(
     })
   } else {
     // Save to local filesystem
-    const templateFilePath = join(process.cwd(), 'src', 'templates', templatePath)
+    // Ensure templatePath has .tsx extension
+    const templateFilePath = templatePath.endsWith('.tsx')
+      ? join(process.cwd(), 'src', 'templates', templatePath)
+      : join(process.cwd(), 'src', 'templates', `${templatePath}.tsx`)
     try {
       console.log('Writing to local filesystem:', templateFilePath)
       await writeFile(templateFilePath, updatedContent, 'utf-8')
@@ -121,7 +124,10 @@ export async function readTemplateContent(templatePath: string): Promise<string 
     }
   } else {
     // Read from local filesystem
-    const templateFilePath = join(process.cwd(), 'src', 'templates', templatePath)
+    // Ensure templatePath has .tsx extension
+    const templateFilePath = templatePath.endsWith('.tsx')
+      ? join(process.cwd(), 'src', 'templates', templatePath)
+      : join(process.cwd(), 'src', 'templates', `${templatePath}.tsx`)
     try {
       return await readFile(templateFilePath, 'utf-8')
     } catch (error: unknown) {
@@ -141,7 +147,9 @@ export async function templateExists(templatePath: string): Promise<boolean> {
     const blobFunctions = await getBlobFunctions()
     if (!blobFunctions) {
       // Fallback to check file
-      const templateFilePath = join(process.cwd(), 'src', 'templates', templatePath)
+      const templateFilePath = templatePath.endsWith('.tsx')
+        ? join(process.cwd(), 'src', 'templates', templatePath)
+        : join(process.cwd(), 'src', 'templates', `${templatePath}.tsx`)
       try {
         await readFile(templateFilePath, 'utf-8')
         return true
@@ -158,7 +166,10 @@ export async function templateExists(templatePath: string): Promise<boolean> {
       return false
     }
   } else {
-    const templateFilePath = join(process.cwd(), 'src', 'templates', templatePath)
+    // Ensure templatePath has .tsx extension
+    const templateFilePath = templatePath.endsWith('.tsx')
+      ? join(process.cwd(), 'src', 'templates', templatePath)
+      : join(process.cwd(), 'src', 'templates', `${templatePath}.tsx`)
     try {
       await readFile(templateFilePath, 'utf-8')
       return true

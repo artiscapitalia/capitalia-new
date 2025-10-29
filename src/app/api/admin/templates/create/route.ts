@@ -27,7 +27,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Construct the full path to the template file
-    const templateFilePath = join(process.cwd(), 'src', 'templates', templatePath + '.tsx')
+    // Ensure templatePath has .tsx extension
+    const templateFilePath = templatePath.endsWith('.tsx')
+      ? join(process.cwd(), 'src', 'templates', templatePath)
+      : join(process.cwd(), 'src', 'templates', `${templatePath}.tsx`)
     const templateDir = dirname(templateFilePath)
 
     // Check if file already exists
