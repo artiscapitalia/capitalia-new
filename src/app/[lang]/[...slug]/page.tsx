@@ -65,7 +65,6 @@ async function loadTemplate(lang: string, templatePath: string): Promise<Templat
   // Try to load from filesystem (works both locally and on Vercel if synced during build)
   try {
     // Dynamic import with variables - Next.js will warn during build but this is expected behavior
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const templateModule = await import(
       /* @vite-ignore */
       `@/templates/${lang}/${templatePath}.tsx`
@@ -97,7 +96,6 @@ async function loadTemplate(lang: string, templatePath: string): Promise<Templat
               
               // Now try to import it again
               // Dynamic import with variables - Next.js will warn during build but this is expected behavior
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               const templateModule = await import(
                 /* @vite-ignore */
                 `@/templates/${lang}/${templatePath}.tsx`
@@ -166,7 +164,7 @@ export default async function Page({ params }: PageProps) {
     // Template loaded from blob storage, use dynamic renderer
     return (
       <main className="min-h-screen bg-white">
-        <DynamicTemplate lang={lang} templateData={templateResult.data} />
+        <DynamicTemplate templateData={templateResult.data} />
       </main>
     )
   } else {
