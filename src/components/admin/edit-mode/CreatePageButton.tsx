@@ -2,7 +2,6 @@
 
 import React, { useState, useContext } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useAuth } from '@/lib/auth/AuthContext'
 import { InlineEditContext } from '@/lib/admin/InlineEditContext'
 import { PlusIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { useAlert } from '@/contexts/AlertContext'
@@ -102,15 +101,9 @@ const CreatePageButtonWrapper: React.FC<{ templatePath: string; isCreateMode: bo
 }
 
 export const CreatePageButton: React.FC<CreatePageButtonProps> = ({ templatePath }) => {
-  const { isAdmin } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
   const isCreateMode = searchParams.get('create') === 'true'
-
-  // Only show for admin users
-  if (!isAdmin) {
-    return null
-  }
 
   // If in create mode, try to render with context
   if (isCreateMode) {

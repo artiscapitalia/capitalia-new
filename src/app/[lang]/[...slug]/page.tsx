@@ -64,7 +64,12 @@ async function loadTemplate(lang: string, templatePath: string): Promise<Templat
 
   // Try to load from filesystem (works both locally and on Vercel if synced during build)
   try {
-    const templateModule = await import(`@/templates/${lang}/${templatePath}.tsx`)
+    // Dynamic import with variables - Next.js will warn during build but this is expected behavior
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const templateModule = await import(
+      /* @vite-ignore */
+      `@/templates/${lang}/${templatePath}.tsx`
+    )
     return templateModule.default
   } catch (error: unknown) {
     const errorObj = error as { code?: string; message?: string }
@@ -91,7 +96,12 @@ async function loadTemplate(lang: string, templatePath: string): Promise<Templat
               await writeFile(templateFilePath, templateContent, 'utf-8')
               
               // Now try to import it again
-              const templateModule = await import(`@/templates/${lang}/${templatePath}.tsx`)
+              // Dynamic import with variables - Next.js will warn during build but this is expected behavior
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              const templateModule = await import(
+                /* @vite-ignore */
+                `@/templates/${lang}/${templatePath}.tsx`
+              )
               return templateModule.default
             } catch (syncError) {
               console.error('Error syncing template from blob to filesystem:', syncError)

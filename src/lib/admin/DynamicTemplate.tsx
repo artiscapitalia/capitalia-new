@@ -12,8 +12,10 @@ interface DynamicTemplateProps {
 /**
  * Dynamic template component that renders templates from parsed blob storage content
  * Used when templates are loaded from Vercel Blob Storage instead of filesystem
+ * @param lang - Language code (reserved for future use)
+ * @param templateData - Parsed template data from blob storage
  */
-export function DynamicTemplate({ lang, templateData }: DynamicTemplateProps) {
+export function DynamicTemplate({ lang: _lang, templateData }: DynamicTemplateProps) {
   const {
     contentOverrides,
     addedComponents,
