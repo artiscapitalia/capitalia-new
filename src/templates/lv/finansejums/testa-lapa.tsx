@@ -35,7 +35,7 @@ const addedComponents: AddedComponent[] = [
   }
 ]
 
-export default function TestaLapaTemplate({ lang }: TemplateProps) {
+export default function TestaLapaTemplate({ lang: _lang }: TemplateProps) {
   return (
     <InlineEditProvider 
       templatePath="lv/finansejums/testa-lapa.tsx"

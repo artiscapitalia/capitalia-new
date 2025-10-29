@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useInlineEdit } from '@/lib/admin/InlineEditContext'
 import { PAGE_COMPONENTS } from '@/components/page'
+import { DynamicModule } from './types'
 
 // Dynamic component renderer
 const DynamicComponent: React.FC<{ componentKey: string; props?: Record<string, unknown> }> = ({ componentKey, props }) => {
@@ -13,14 +14,15 @@ const DynamicComponent: React.FC<{ componentKey: string; props?: Record<string, 
         if (componentDef) {
             componentDef.component().then(module => {
                 // Handle default export or named export
-                const moduleExports = module as any
+                const moduleExports = module as DynamicModule
                 let ComponentToUse: React.ComponentType<Record<string, unknown>> | undefined
 
                 if (moduleExports.default) {
                     ComponentToUse = moduleExports.default
                 } else {
                     // Try to find the component by name in the module
-                    ComponentToUse = moduleExports[componentDef.name] || moduleExports[componentKey]
+                    const namedExport = moduleExports[componentDef.name] || moduleExports[componentKey]
+                    ComponentToUse = namedExport as React.ComponentType<Record<string, unknown>> | undefined
                 }
 
                 if (ComponentToUse) {
