@@ -20,7 +20,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const isAdmin = user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL
+  // Test mode: Force admin access if NEXT_PUBLIC_FORCE_ADMIN is set
+  const forceAdmin = process.env.NEXT_PUBLIC_FORCE_ADMIN === 'true'
+  const isAdmin = forceAdmin || user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL
 
   useEffect(() => {
     // Get initial session
