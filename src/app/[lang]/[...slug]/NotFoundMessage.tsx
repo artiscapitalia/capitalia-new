@@ -33,12 +33,6 @@ export const NotFoundMessage: React.FC<NotFoundMessageProps> = ({ templatePath, 
         <p className="text-lg text-gray-600">
           Path: <span className="font-semibold">/{slug.join('/')}</span>
         </p>
-        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg max-w-md mx-auto">
-          <p className="text-sm text-yellow-800">
-            Create template at: <br />
-            <code className="text-xs">src/templates/{lang}/{templatePath}.tsx</code>
-          </p>
-        </div>
       </div>
     </div>
   )

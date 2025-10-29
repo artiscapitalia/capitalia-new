@@ -1,59 +1,37 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth/AuthContext'
-import { useInlineEdit } from '@/lib/admin/InlineEditContext'
+import { InlineEditContext } from '@/lib/admin/InlineEditContext'
 import { PlusIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { useAlert } from '@/contexts/AlertContext'
 
 interface CreatePageButtonProps {
   templatePath: string
-  lang: string
+  lang?: string
 }
 
-export const CreatePageButton: React.FC<CreatePageButtonProps> = ({ templatePath, lang }) => {
-  const { isAdmin } = useAuth()
+// Internal component that uses hooks - only rendered when in InlineEditProvider
+const CreatePageButtonWithContext: React.FC<{ templatePath: string }> = ({ templatePath }) => {
+  const inlineEditContext = useContext(InlineEditContext)
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const isCreateMode = searchParams.get('create') === 'true'
-  
-  // Get inline edit context if we're in create mode (within InlineEditProvider)
-  let inlineEditContext: ReturnType<typeof useInlineEdit> | null = null
-  try {
-    inlineEditContext = useInlineEdit()
-  } catch {
-    // Not in InlineEditProvider context yet
-  }
-
   const { showAlert } = useAlert()
   const [isSaving, setIsSaving] = useState(false)
 
-  // Only show for admin users
-  if (!isAdmin) {
+  if (!inlineEditContext) {
     return null
   }
 
-  const handleCreatePage = () => {
-    // Navigate to create mode
-    router.push(`?create=true`)
-  }
-
   const handleCancel = () => {
-    // Exit create mode - remove create query param
     const url = new URL(window.location.href)
     url.searchParams.delete('create')
     router.push(url.pathname)
   }
 
   const handleSave = async () => {
-    if (!inlineEditContext) {
-      return
-    }
-
     setIsSaving(true)
     try {
-      // Create the template file
       const response = await fetch('/api/admin/templates/create', {
         method: 'POST',
         headers: {
@@ -74,7 +52,6 @@ export const CreatePageButton: React.FC<CreatePageButtonProps> = ({ templatePath
 
       showAlert({ type: 'success', message: 'Page created successfully!', position: 'top' })
       
-      // Remove create query param and reload page to show the newly created template
       const currentPath = window.location.pathname
       router.replace(currentPath)
       router.refresh()
@@ -89,36 +66,66 @@ export const CreatePageButton: React.FC<CreatePageButtonProps> = ({ templatePath
     }
   }
 
-  // If in create mode and within InlineEditProvider, show Save/Cancel buttons
-  if (isCreateMode && inlineEditContext) {
-    return (
-      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 items-center w-full max-w-sm">
-        <div className="bg-black hover:bg-gray-800 rounded-full px-4 py-2 flex items-center justify-center gap-2">
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="text-white p-3 rounded-full transition-colors hover:bg-gray-700 disabled:opacity-50"
-            title="Save page"
-          >
-            <CheckIcon className="w-5 h-5" />
-          </button>
-          <button
-            onClick={handleCancel}
-            disabled={isSaving}
-            className="text-white p-3 rounded-full transition-colors hover:bg-gray-700 disabled:opacity-50"
-            title="Cancel"
-          >
-            <XMarkIcon className="w-5 h-5" />
-          </button>
-        </div>
-        <div className="bg-gray-100 rounded-full py-2 px-4 text-xs text-gray-700 text-center">
-          {isSaving ? 'Creating page...' : 'Add components and click Save to create the page.'}
-        </div>
+  return (
+    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 items-center w-full max-w-sm">
+      <div className="bg-black hover:bg-gray-800 rounded-full px-4 py-2 flex items-center justify-center gap-2">
+        <button
+          onClick={handleSave}
+          disabled={isSaving}
+          className="text-white p-3 rounded-full transition-colors hover:bg-gray-700 disabled:opacity-50"
+          title="Save page"
+        >
+          <CheckIcon className="w-5 h-5" />
+        </button>
+        <button
+          onClick={handleCancel}
+          disabled={isSaving}
+          className="text-white p-3 rounded-full transition-colors hover:bg-gray-700 disabled:opacity-50"
+          title="Cancel"
+        >
+          <XMarkIcon className="w-5 h-5" />
+        </button>
       </div>
-    )
+      <div className="bg-gray-100 rounded-full py-2 px-4 text-xs text-gray-700 text-center">
+        {isSaving ? 'Creating page...' : 'Add components and click Save to create the page.'}
+      </div>
+    </div>
+  )
+}
+
+// Wrapper that conditionally renders based on context availability
+const CreatePageButtonWrapper: React.FC<{ templatePath: string; isCreateMode: boolean }> = ({ templatePath, isCreateMode }) => {
+  if (!isCreateMode) {
+    return null
+  }
+
+  return <CreatePageButtonWithContext templatePath={templatePath} />
+}
+
+export const CreatePageButton: React.FC<CreatePageButtonProps> = ({ templatePath, lang }) => {
+  // lang is kept for API compatibility but not currently used
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  void lang
+  const { isAdmin } = useAuth()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const isCreateMode = searchParams.get('create') === 'true'
+
+  // Only show for admin users
+  if (!isAdmin) {
+    return null
+  }
+
+  // If in create mode, try to render with context
+  if (isCreateMode) {
+    return <CreatePageButtonWrapper templatePath={templatePath} isCreateMode={isCreateMode} />
   }
 
   // Show Create page button
+  const handleCreatePage = () => {
+    router.push(`?create=true`)
+  }
+
   return (
     <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 items-center w-full max-w-sm">
       <button

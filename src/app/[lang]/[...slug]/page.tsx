@@ -22,8 +22,14 @@ async function loadTemplate(lang: string, templatePath: string) {
     // Mēģinām ielādēt template failu ar .tsx paplašinājumu
     const templateModule = await import(`@/templates/${lang}/${templatePath}.tsx`)
     return templateModule.default
-  } catch (error) {
-    console.error(`Template not found: @/templates/${lang}/${templatePath}.tsx`, error)
+  } catch (error: any) {
+    // Ignore module not found errors - these are expected for non-existent templates
+    if (error?.code === 'MODULE_NOT_FOUND' || error?.message?.includes('Cannot find module')) {
+      // Template doesn't exist, return null
+      return null
+    }
+    // Log other errors but still return null
+    console.error(`Error loading template: @/templates/${lang}/${templatePath}.tsx`, error)
     return null
   }
 }
