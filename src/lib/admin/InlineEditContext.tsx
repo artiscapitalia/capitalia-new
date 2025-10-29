@@ -63,12 +63,17 @@ export const InlineEditProvider: React.FC<InlineEditProviderProps> = ({
       })
 
       if (!response.ok) {
-        throw new Error('Failed to save template')
+        // Try to get error details from response
+        const errorData = await response.json().catch(() => ({}))
+        const errorMessage = errorData.error || errorData.details || 'Failed to save template'
+        throw new Error(errorMessage)
       }
 
       console.log('Template saved successfully')
     } catch (error) {
       console.error('Error saving template:', error)
+      // Re-throw to allow caller to handle
+      throw error
     }
   }
 

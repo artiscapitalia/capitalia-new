@@ -210,6 +210,39 @@ src/components/page/intro/
 - Use `@/` alias for imports from `src/` directory
 - Example: `import { useInlineEdit } from '@/lib/admin/InlineEditContext'`
 
+### Code Comments and Documentation
+
+**CRITICAL RULES**:
+
+1. **Comment Content**: When describing code in comments, always write about **what** the method, function, or component does. Focus on the purpose and behavior, not implementation details unless necessary.
+
+   **DO**:
+   ```typescript
+   // Validates user authentication token and returns user data
+   export const validateAuth = async (token: string) => {
+     // implementation
+   }
+   ```
+
+   **DON'T**:
+   ```typescript
+   // This function was needed because the old system had bugs
+   export const validateAuth = async (token: string) => {
+     // implementation
+   }
+   ```
+
+2. **Deleted Code Comments**: When code is deleted or removed, **DO NOT** write comments explaining why the deleted thing is no longer needed or why it was removed.
+
+   **DON'T**:
+   ```typescript
+   // Removed this function because we're using a different approach now
+   // This is no longer needed since we refactored the component
+   // Deleted because it caused performance issues
+   ```
+
+   **DO**: Simply delete the code without explanatory comments about why it's being removed.
+
 ## Migration Notes
 
 When refactoring existing code:

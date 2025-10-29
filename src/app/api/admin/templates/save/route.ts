@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readFile, writeFile } from 'fs/promises'
+import { readTemplateContent, saveTemplateContent } from '@/lib/admin/templateStorage'
+import { readFile } from 'fs/promises'
 import { join } from 'path'
 
 interface AddedComponent {
@@ -29,27 +30,60 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Construct the full path to the template file
-    const templateFilePath = join(process.cwd(), 'src', 'templates', templatePath)
-
     try {
-      // Read the existing template file
-      const existingContent = await readFile(templateFilePath, 'utf-8')
+      // Read existing template content (from blob storage on Vercel, file system locally)
+      let existingContent = await readTemplateContent(templatePath)
+      
+      // If not found in storage/blob, try to read from source file as fallback
+      if (!existingContent) {
+        try {
+          const templateFilePath = join(process.cwd(), 'src', 'templates', templatePath)
+          console.log('Reading template from file:', templateFilePath)
+          console.log('Current working directory:', process.cwd())
+          existingContent = await readFile(templateFilePath, 'utf-8')
+          console.log('Successfully read template file')
+        } catch (fileError: any) {
+          console.error('Error reading template file:', fileError)
+          return NextResponse.json(
+            { 
+              error: 'Template file not found',
+              details: fileError.message || String(fileError),
+              path: join(process.cwd(), 'src', 'templates', templatePath)
+            },
+            { status: 404 }
+          )
+        }
+      }
       
       // Update the contentOverrides and addedComponents in the template
       const updatedContent = updateTemplateContent(existingContent, content, addedComponents)
       
-      // Write the updated content back to the file
-      await writeFile(templateFilePath, updatedContent, 'utf-8')
+      // Save using hybrid storage (local filesystem or Vercel Blob)
+      console.log('Saving template to storage, path:', templatePath)
+      console.log('Is Vercel:', !!process.env.VERCEL)
+      await saveTemplateContent(templatePath, updatedContent)
+      console.log('Template saved successfully')
 
       return NextResponse.json(
         { message: 'Template saved successfully' },
         { status: 200 }
       )
-    } catch (fileError) {
-      console.error('File operation error:', fileError)
+    } catch (storageError) {
+      console.error('Storage operation error:', storageError)
+      const errorMessage = storageError instanceof Error ? storageError.message : String(storageError)
+      const errorStack = storageError instanceof Error ? storageError.stack : undefined
+      console.error('Error details:', {
+        message: errorMessage,
+        stack: errorStack,
+        templatePath,
+        cwd: process.cwd()
+      })
       return NextResponse.json(
-        { error: 'Failed to read or write template file' },
+        { 
+          error: 'Failed to read or write template',
+          details: errorMessage,
+          stack: process.env.NODE_ENV === 'development' ? errorStack : undefined
+        },
         { status: 500 }
       )
     }
