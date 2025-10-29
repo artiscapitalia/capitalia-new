@@ -58,14 +58,16 @@ export async function saveTemplateContent(
       console.log('Writing to local filesystem:', templateFilePath)
       await writeFile(templateFilePath, updatedContent, 'utf-8')
       console.log('Successfully wrote to local filesystem')
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      const errorCode = error && typeof error === 'object' && 'code' in error ? String(error.code) : undefined
       console.error('Error writing to local filesystem:', {
-        error: error.message,
-        code: error.code,
+        error: errorMessage,
+        code: errorCode,
         path: templateFilePath,
         cwd: process.cwd()
       })
-      throw new Error(`Failed to write template file: ${error.message}`)
+      throw new Error(`Failed to write template file: ${errorMessage}`)
     }
   }
 }
@@ -105,9 +107,15 @@ export async function readTemplateContent(templatePath: string): Promise<string 
       }
       
       return await response.text()
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If blob doesn't exist, return null (will fallback to file)
-      if (error.name === 'BlobNotFoundError' || error.status === 404 || error.code === 'ENOENT') {
+      const isBlobNotFound = error && 
+        typeof error === 'object' && 
+        ('name' in error && error.name === 'BlobNotFoundError' ||
+         'status' in error && error.status === 404 ||
+         'code' in error && error.code === 'ENOENT')
+      
+      if (isBlobNotFound) {
         return null
       }
       throw error
@@ -117,8 +125,8 @@ export async function readTemplateContent(templatePath: string): Promise<string 
     const templateFilePath = join(process.cwd(), 'src', 'templates', templatePath)
     try {
       return await readFile(templateFilePath, 'utf-8')
-    } catch (error: any) {
-      if (error.code === 'ENOENT') {
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
         return null
       }
       throw error

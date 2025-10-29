@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
       try {
         const templateFilePath = join(process.cwd(), 'src', 'templates', templatePath)
         templateContent = await readFile(templateFilePath, 'utf-8')
-      } catch (error) {
+      } catch {
         return NextResponse.json(
           { error: 'Template not found' },
           { status: 404 }

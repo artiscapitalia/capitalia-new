@@ -42,12 +42,13 @@ export async function POST(request: NextRequest) {
           console.log('Current working directory:', process.cwd())
           existingContent = await readFile(templateFilePath, 'utf-8')
           console.log('Successfully read template file')
-        } catch (fileError: any) {
+        } catch (fileError: unknown) {
           console.error('Error reading template file:', fileError)
+          const errorMessage = fileError instanceof Error ? fileError.message : String(fileError)
           return NextResponse.json(
             { 
               error: 'Template file not found',
-              details: fileError.message || String(fileError),
+              details: errorMessage,
               path: join(process.cwd(), 'src', 'templates', templatePath)
             },
             { status: 404 }

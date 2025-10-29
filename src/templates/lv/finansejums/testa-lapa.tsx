@@ -35,7 +35,8 @@ const addedComponents: AddedComponent[] = [
   }
 ]
 
-export default function TestaLapaTemplate({ lang: _lang }: TemplateProps) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export default function TestaLapaTemplate({ lang }: TemplateProps) {
   return (
     <InlineEditProvider 
       templatePath="lv/finansejums/testa-lapa.tsx"
