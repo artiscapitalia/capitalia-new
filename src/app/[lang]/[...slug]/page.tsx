@@ -2,6 +2,10 @@ import React, { Suspense } from 'react'
 import { CreatePageView } from '@/components/admin/edit-mode/CreatePageView'
 import { NotFoundMessage } from './NotFoundMessage'
 import { CreatePageButtonWrapper } from './CreatePageButtonWrapper'
+import { readTemplateContent } from '@/lib/admin/templateStorage'
+import { writeFile, mkdir } from 'fs/promises'
+import { join, dirname } from 'path'
+import { existsSync } from 'fs'
 
 interface PageProps {
   params: Promise<{
@@ -18,17 +22,57 @@ function getTemplatePath(slugPath: string[]): string {
 
 // Funkcija, kas ielādē template komponenti
 async function loadTemplate(lang: string, templatePath: string) {
+  // First try to load from filesystem (works both locally and on Vercel if synced during build)
   try {
-    // Mēģinām ielādēt template failu ar .tsx paplašinājumu
     const templateModule = await import(`@/templates/${lang}/${templatePath}.tsx`)
     return templateModule.default
   } catch (error: unknown) {
-    // Ignore module not found errors - these are expected for non-existent templates
     const errorObj = error as { code?: string; message?: string }
     if (errorObj?.code === 'MODULE_NOT_FOUND' || errorObj?.message?.includes('Cannot find module')) {
-      // Template doesn't exist, return null
+      // Template doesn't exist in filesystem
+      // On Vercel, if template exists in blob storage but not in filesystem,
+      // it needs to be synced during build time (not runtime, as filesystem is read-only)
+      // For local development, we can try to sync from blob to filesystem
+      
+      const isVercel = !!process.env.VERCEL && process.env.VERCEL === '1'
+      const fullTemplatePath = `${lang}/${templatePath}`
+      
+      if (!isVercel) {
+        // Local development: try to sync from blob storage to filesystem if it exists
+        try {
+          const templateContent = await readTemplateContent(fullTemplatePath)
+          
+          if (templateContent) {
+            // Template exists in blob storage, sync to filesystem
+            try {
+              const templateFilePath = join(process.cwd(), 'src', 'templates', fullTemplatePath + '.tsx')
+              const templateDir = dirname(templateFilePath)
+              
+              // Create directory if it doesn't exist
+              if (!existsSync(templateDir)) {
+                await mkdir(templateDir, { recursive: true })
+              }
+              
+              // Write template to filesystem
+              await writeFile(templateFilePath, templateContent, 'utf-8')
+              
+              // Now try to import it again
+              const templateModule = await import(`@/templates/${lang}/${templatePath}.tsx`)
+              return templateModule.default
+            } catch (syncError) {
+              console.error('Error syncing template from blob to filesystem:', syncError)
+              // Continue to return null - template will show as not found
+            }
+          }
+        } catch (blobError) {
+          // Error reading blob, but that's ok - template just doesn't exist
+          console.log('Template not found in blob storage:', blobError)
+        }
+      }
+      // Template doesn't exist (neither in filesystem nor blob storage, or on Vercel filesystem is read-only)
       return null
     }
+    
     // Log other errors but still return null
     console.error(`Error loading template: @/templates/${lang}/${templatePath}.tsx`, error)
     return null
@@ -72,11 +116,12 @@ export default async function Page({ params }: PageProps) {
       </main>
     )
   }
-  
-  // Renderējam atrasto template
+
+  // Renderējam atrasto template no filesystem
   return (
     <main className="min-h-screen bg-white">
       <TemplateComponent lang={lang} />
     </main>
   )
 }
+

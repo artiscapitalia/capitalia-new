@@ -9,7 +9,7 @@ interface CreatePageButtonWrapperProps {
   lang: string
 }
 
-export const CreatePageButtonWrapper: React.FC<CreatePageButtonWrapperProps> = ({ templatePath, lang }) => {
+export const CreatePageButtonWrapper: React.FC<CreatePageButtonWrapperProps> = ({ templatePath }) => {
   const searchParams = useSearchParams()
   const isCreateMode = searchParams.get('create') === 'true'
 

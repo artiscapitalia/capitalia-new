@@ -39,37 +39,26 @@ export async function POST(request: NextRequest) {
       if (!existingContent) {
         const isVercel = !!process.env.VERCEL && process.env.VERCEL === '1'
         
-        if (isVercel) {
-          // On Vercel, if blob doesn't exist and we can't read from filesystem,
-          // create a new template structure from scratch
-          console.log('Creating new template on Vercel from scratch')
-          existingContent = createTemplateFromScratch(templatePath, content, addedComponents)
-        } else {
-          // Locally, try to read from filesystem
+        // Locally, try to read from filesystem first
+        if (!isVercel) {
           try {
             // Ensure templatePath has .tsx extension
             const templateFilePath = templatePath.endsWith('.tsx') 
               ? join(process.cwd(), 'src', 'templates', templatePath)
               : join(process.cwd(), 'src', 'templates', `${templatePath}.tsx`)
             console.log('Reading template from file:', templateFilePath)
-            console.log('Current working directory:', process.cwd())
             existingContent = await readFile(templateFilePath, 'utf-8')
             console.log('Successfully read template file')
           } catch (fileError: unknown) {
-            console.error('Error reading template file:', fileError)
-            const errorMessage = fileError instanceof Error ? fileError.message : String(fileError)
-            const templateFilePath = templatePath.endsWith('.tsx') 
-              ? join(process.cwd(), 'src', 'templates', templatePath)
-              : join(process.cwd(), 'src', 'templates', `${templatePath}.tsx`)
-            return NextResponse.json(
-              { 
-                error: 'Template file not found',
-                details: errorMessage,
-                path: templateFilePath
-              },
-              { status: 404 }
-            )
+            // Template doesn't exist in filesystem either
+            // Create from scratch (works both locally and on Vercel)
+            console.log('Template not found in filesystem, creating from scratch')
+            existingContent = createTemplateFromScratch(templatePath, content, addedComponents)
           }
+        } else {
+          // On Vercel, if blob doesn't exist, create a new template structure from scratch
+          console.log('Creating new template on Vercel from scratch')
+          existingContent = createTemplateFromScratch(templatePath, content, addedComponents)
         }
       }
       

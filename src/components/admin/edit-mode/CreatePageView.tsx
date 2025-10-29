@@ -11,7 +11,7 @@ interface CreatePageViewProps {
   lang: string
 }
 
-export const CreatePageView: React.FC<CreatePageViewProps> = ({ templatePath, lang }) => {
+export const CreatePageView: React.FC<CreatePageViewProps> = ({ templatePath }) => {
   const searchParams = useSearchParams()
   const isCreateMode = searchParams.get('create') === 'true'
 

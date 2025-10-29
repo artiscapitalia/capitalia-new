@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import { join, dirname } from 'path'
-import { existsSync } from 'fs'
 import { generateTemplateCode } from '@/lib/admin/templateGenerator'
+import { saveTemplateContent, templateExists } from '@/lib/admin/templateStorage'
 import { AddedComponent } from '@/lib/admin/types'
 
 interface CreateTemplateRequest {
@@ -26,34 +24,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Construct the full path to the template file
-    // Ensure templatePath has .tsx extension
-    const templateFilePath = templatePath.endsWith('.tsx')
-      ? join(process.cwd(), 'src', 'templates', templatePath)
-      : join(process.cwd(), 'src', 'templates', `${templatePath}.tsx`)
-    const templateDir = dirname(templateFilePath)
-
-    // Check if file already exists
-    if (existsSync(templateFilePath)) {
+    // Check if template already exists (both filesystem and blob storage)
+    const exists = await templateExists(templatePath)
+    if (exists) {
       return NextResponse.json(
-        { error: 'Template file already exists' },
+        { error: 'Template already exists' },
         { status: 400 }
       )
-    }
-
-    // Create directory if it doesn't exist
-    if (!existsSync(templateDir)) {
-      await mkdir(templateDir, { recursive: true })
     }
 
     // Generate template code
     const templateCode = generateTemplateCode(templatePath, content, addedComponents)
 
-    // Write the template file
-    await writeFile(templateFilePath, templateCode, 'utf-8')
+    // Save using hybrid storage (local filesystem or Vercel Blob)
+    await saveTemplateContent(templatePath, templateCode)
 
+    const isVercel = !!process.env.VERCEL && process.env.VERCEL === '1'
+    
     return NextResponse.json(
-      { message: 'Template created successfully', path: templateFilePath },
+      { 
+        message: 'Template created successfully',
+        location: isVercel ? 'Vercel Blob Storage' : `src/templates/${templatePath}.tsx`
+      },
       { status: 200 }
     )
   } catch (error) {
