@@ -14,9 +14,10 @@ export const InlineEditProvider: React.FC<InlineEditProviderProps> = ({
   children,
   templatePath,
   initialContent = {},
-  initialComponents = []
+  initialComponents = [],
+  autoEnableEditMode = false
 }) => {
-  const [isEditMode, setIsEditMode] = useState(false)
+  const [isEditMode, setIsEditMode] = useState(autoEnableEditMode)
   const [templateContent, setTemplateContent] = useState<TemplateContent>(initialContent)
   const [addedComponents, setAddedComponents] = useState<AddedComponent[]>(initialComponents)
 

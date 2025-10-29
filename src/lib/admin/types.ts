@@ -28,5 +28,6 @@ export interface InlineEditProviderProps {
   templatePath?: string
   initialContent?: TemplateContent
   initialComponents?: AddedComponent[]
+  autoEnableEditMode?: boolean
 }
 
