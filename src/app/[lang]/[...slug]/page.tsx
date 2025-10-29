@@ -64,11 +64,15 @@ async function loadTemplate(lang: string, templatePath: string): Promise<Templat
 
   // Try to load from filesystem (works both locally and on Vercel if synced during build)
   try {
-    // Dynamic import with variables - Next.js will warn during build but this is expected behavior
+    // Dynamic import with variables - Next.js/Turbopack will warn during build but this is expected behavior
+    // Templates may not exist at build time, so we use dynamic imports at runtime
+    // Using type assertion to handle dynamic import result
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const templateModule = await import(
       /* @vite-ignore */
+      /* webpackIgnore: true */
       `@/templates/${lang}/${templatePath}.tsx`
-    )
+    ) as { default: React.ComponentType<{ lang: string }> }
     return templateModule.default
   } catch (error: unknown) {
     const errorObj = error as { code?: string; message?: string }
@@ -95,11 +99,14 @@ async function loadTemplate(lang: string, templatePath: string): Promise<Templat
               await writeFile(templateFilePath, templateContent, 'utf-8')
               
               // Now try to import it again
-              // Dynamic import with variables - Next.js will warn during build but this is expected behavior
+              // Dynamic import with variables - Next.js/Turbopack will warn during build but this is expected behavior
+              // Using type assertion to handle dynamic import result
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
               const templateModule = await import(
                 /* @vite-ignore */
+                /* webpackIgnore: true */
                 `@/templates/${lang}/${templatePath}.tsx`
-              )
+              ) as { default: React.ComponentType<{ lang: string }> }
               return templateModule.default
             } catch (syncError) {
               console.error('Error syncing template from blob to filesystem:', syncError)
