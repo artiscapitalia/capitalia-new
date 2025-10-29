@@ -2,70 +2,8 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// Default language and supported languages
-const DEFAULT_LANGUAGE = 'en'
-const SUPPORTED_LANGUAGES = ['lv', 'en']
-
-function getSupportedLanguages(): string[] {
-    return SUPPORTED_LANGUAGES
-}
-
-function isLanguagePath(pathname: string): { isLangPath: boolean; lang?: string; restPath?: string } {
-    const segments = pathname.split('/').filter(Boolean)
-
-    if (segments.length === 0) {
-        return { isLangPath: false }
-    }
-
-    const firstSegment = segments[0]
-
-    // Check if first segment looks like a language code (2-5 chars, lowercase)
-    if (/^[a-z]{2,5}(-[a-z]{2,4})?$/.test(firstSegment)) {
-        return {
-            isLangPath: true,
-            lang: firstSegment,
-            restPath: segments.length > 1 ? '/' + segments.slice(1).join('/') : '/'
-        }
-    }
-
-    return { isLangPath: false }
-}
-
 export async function middleware(req: NextRequest) {
-    const pathname = req.nextUrl.pathname
-
-    // Handle language-based routing for non-admin, non-api routes
-    if (!pathname.startsWith('/admin') &&
-        !pathname.startsWith('/api') &&
-        !pathname.startsWith('/_next') &&
-        !pathname.match(/\.(ico|png|jpg|jpeg|gif|svg|webp)$/)) {
-
-        const supportedLangs = getSupportedLanguages()
-        const { isLangPath, lang, restPath } = isLanguagePath(pathname)
-
-        if (isLangPath && lang) {
-            // Check if the language is supported
-            if (!supportedLangs.includes(lang)) {
-                // Redirect to default language with same path
-                const redirectUrl = new URL(`/${DEFAULT_LANGUAGE}${restPath || '/'}`, req.url)
-                return NextResponse.redirect(redirectUrl)
-            }
-        } else if (pathname === '/' || pathname === '') {
-            // Root path - redirect to default language
-            const redirectUrl = new URL(`/${DEFAULT_LANGUAGE}/`, req.url)
-            return NextResponse.redirect(redirectUrl)
-        } else if (!isLangPath) {
-            // Path without language prefix - redirect to default language
-            const redirectUrl = new URL(`/${DEFAULT_LANGUAGE}${pathname}`, req.url)
-            return NextResponse.redirect(redirectUrl)
-        }
-
-        return NextResponse.next({
-            request: {
-                headers: req.headers,
-            },
-        })
-    }
+    const pathname = req.nextUrl.pathname;
 
     if (pathname.startsWith('/admin')) {
         let response = NextResponse.next({

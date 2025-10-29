@@ -31,3 +31,13 @@ export interface InlineEditProviderProps {
   autoEnableEditMode?: boolean
 }
 
+/**
+ * Template data structure stored as JSON in Vercel Blob Storage
+ */
+export interface TemplateData {
+  templatePath: string
+  className: string
+  contentOverrides: TemplateContent
+  addedComponents: AddedComponent[]
+}
+

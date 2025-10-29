@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { readTemplateData } from '@/lib/admin/templateStorage'
 
 /**
- * API endpoint to load template data
- * Returns template data (JSON on Vercel, parsed from .tsx locally)
+ * API endpoint to render template data
+ * Returns template data as JSON (from blob storage on Vercel or parsed from .tsx locally)
  */
 export async function GET(request: NextRequest) {
   try {
@@ -17,9 +17,9 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Read template data (JSON on Vercel, parsed from .tsx locally)
+    // Read template data
     const templateData = await readTemplateData(templatePath)
-
+    
     if (!templateData) {
       return NextResponse.json(
         { error: 'Template not found' },
@@ -28,11 +28,14 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(
-      templateData,
+      {
+        ...templateData,
+        source: process.env.VERCEL ? 'blob' : 'filesystem'
+      },
       { status: 200 }
     )
   } catch (error) {
-    console.error('Template load error:', error)
+    console.error('Template render error:', error)
     return NextResponse.json(
       { 
         error: 'Internal server error',

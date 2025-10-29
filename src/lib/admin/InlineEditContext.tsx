@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { 
   TemplateContent, 
   InlineEditContextType, 
@@ -20,19 +20,62 @@ export const InlineEditProvider: React.FC<InlineEditProviderProps> = ({
   const [isEditMode, setIsEditMode] = useState(autoEnableEditMode)
   const [templateContent, setTemplateContent] = useState<TemplateContent>(initialContent)
   const [addedComponents, setAddedComponents] = useState<AddedComponent[]>(initialComponents)
+  
+  // Use refs to track previous values for comparison and whether we've initialized
+  const prevInitialContentRef = useRef<string>(JSON.stringify(initialContent))
+  const prevInitialComponentsRef = useRef<string>(JSON.stringify(initialComponents))
+  const hasUserEditedRef = useRef<boolean>(false)
+
+  // Update state when initialContent or initialComponents change (e.g., after page refresh with new data)
+  // BUT only if user hasn't edited yet (to preserve user changes)
+  useEffect(() => {
+    const newContentStr = JSON.stringify(initialContent)
+    const newComponentsStr = JSON.stringify(initialComponents)
+    const currentContentStr = JSON.stringify(templateContent)
+    
+    // Only update from initialContent if:
+    // 1. It actually changed AND
+    // 2. Current content is empty or same as previous initialContent (not user-edited)
+    const contentChanged = newContentStr !== prevInitialContentRef.current
+    const contentIsEmpty = Object.keys(templateContent).length === 0
+    const contentMatchesPrevious = currentContentStr === prevInitialContentRef.current
+    
+    if (contentChanged && (contentIsEmpty || contentMatchesPrevious || !hasUserEditedRef.current)) {
+      console.log('[InlineEditProvider] InitialContent changed, updating templateContent', {
+        old: prevInitialContentRef.current.substring(0, 100),
+        new: newContentStr.substring(0, 100),
+        currentContentKeys: Object.keys(templateContent)
+      })
+      prevInitialContentRef.current = newContentStr
+      setTemplateContent(initialContent)
+      hasUserEditedRef.current = false // Reset flag when loading new data
+    }
+    
+    if (newComponentsStr !== prevInitialComponentsRef.current) {
+      console.log('[InlineEditProvider] InitialComponents changed, updating addedComponents')
+      prevInitialComponentsRef.current = newComponentsStr
+      setAddedComponents(initialComponents)
+    }
+  }, [initialContent, initialComponents, templateContent])
 
   const toggleEditMode = () => {
     setIsEditMode(!isEditMode)
   }
 
   const updateContent = (componentId: string, elementId: string, content: string) => {
-    setTemplateContent(prev => ({
-      ...prev,
-      [componentId]: {
-        ...prev[componentId],
-        [elementId]: content
+    hasUserEditedRef.current = true // Mark that user has edited
+    console.log('[updateContent] User edited content:', { componentId, elementId, content })
+    setTemplateContent(prev => {
+      const updated = {
+        ...prev,
+        [componentId]: {
+          ...prev[componentId],
+          [elementId]: content
+        }
       }
-    }))
+      console.log('[updateContent] Updated templateContent:', updated)
+      return updated
+    })
   }
 
   const addComponent = (componentKey: string, props?: Record<string, unknown>) => {
@@ -50,17 +93,30 @@ export const InlineEditProvider: React.FC<InlineEditProviderProps> = ({
       return
     }
 
+    // Debug logging before save
+    console.log('[saveTemplate] Saving template with data:', {
+      templatePath,
+      templateContent,
+      templateContentKeys: Object.keys(templateContent),
+      addedComponents,
+      templateContentString: JSON.stringify(templateContent)
+    })
+
     try {
+      const requestBody = {
+        templatePath,
+        content: templateContent,
+        addedComponents: addedComponents
+      }
+      
+      console.log('[saveTemplate] Request body:', JSON.stringify(requestBody, null, 2))
+      
       const response = await fetch('/api/admin/templates/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          templatePath,
-          content: templateContent,
-          addedComponents: addedComponents
-        })
+        body: JSON.stringify(requestBody)
       })
 
       if (!response.ok) {

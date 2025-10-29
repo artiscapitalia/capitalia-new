@@ -1,20 +1,29 @@
 'use client'
 
 import React from 'react'
+import { useRouter } from 'next/navigation'
 import { useInlineEdit } from '@/lib/admin/InlineEditContext'
 import { PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { useAlert } from '@/contexts/AlertContext'
 
 export const EditModeToggle: React.FC = () => {
+    const router = useRouter()
     const { isEditMode, toggleEditMode, saveTemplate } = useInlineEdit()
     const { showAlert } = useAlert()
 
     const handleSave = async () => {
         try {
             await saveTemplate()
-            showAlert({ type: 'success', message: 'Template saved successfully!', position: 'top' })    
-        } catch {
-            showAlert({ type: 'error', message: 'Failed to save template', position: 'top' })
+            showAlert({ type: 'success', message: 'Template saved successfully!', position: 'top' })
+            
+            // Refresh page to show updated content
+            router.refresh()
+        } catch (error) {
+            showAlert({ 
+                type: 'error', 
+                message: error instanceof Error ? error.message : 'Failed to save template', 
+                position: 'top' 
+            })
         }
     }
 
