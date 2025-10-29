@@ -27,5 +27,6 @@ export interface InlineEditProviderProps {
   children: React.ReactNode
   templatePath?: string
   initialContent?: TemplateContent
+  initialComponents?: AddedComponent[]
 }
 

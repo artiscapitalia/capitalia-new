@@ -1,5 +1,4 @@
 import React from 'react'
-import { Intro } from '@/components/page'
 import { InlineEditProvider } from '@/lib/admin/InlineEditContext'
 import { EditModeToggle, TemplateWrapper } from '@/components/admin/edit-mode'
 import { AddedComponent } from '@/lib/admin/types'
@@ -12,26 +11,42 @@ interface TemplateProps {
 const contentOverrides = {}
 
 // Dynamically added components
-const addedComponents: AddedComponent[] = []
+const addedComponents: AddedComponent[] = [
+  {
+    "id": "intro-1761730213707",
+    "componentKey": "intro",
+    "props": {
+      "lang": "lv"
+    }
+  },
+  {
+    "id": "spacing-1761730216547",
+    "componentKey": "spacing",
+    "props": {
+      "height": 40
+    }
+  },
+  {
+    "id": "intro-1761730221684",
+    "componentKey": "intro",
+    "props": {
+      "lang": "lv"
+    }
+  }
+]
 
-export default function BusinessFinancingTemplate({ lang }: TemplateProps) {
+export default function TestaLapaTemplate({ lang }: TemplateProps) {
   return (
     <InlineEditProvider 
-      templatePath="en/business/business-financing.tsx"
+      templatePath="lv/finansejums/testa-lapa.tsx"
       initialContent={contentOverrides}
       initialComponents={addedComponents}
     >
-      <TemplateWrapper className="template-business-financing">
-        {/* Intro komponente */}
-        <Intro lang={lang} contentOverrides={contentOverrides} />
-        
-        {/* Here we can add more components */}
-        {/* Example: <Services lang={lang} /> */}
-        {/* Example: <ContactForm lang={lang} /> */}
-        
+      <TemplateWrapper className="template-testa-lapa">
         {/* Edit mode toggle */}
         <EditModeToggle />
       </TemplateWrapper>
     </InlineEditProvider>
   )
 }
+

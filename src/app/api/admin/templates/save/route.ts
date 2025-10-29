@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 
+interface AddedComponent {
+  id: string
+  componentKey: string
+  props?: Record<string, unknown>
+}
+
 interface SaveTemplateRequest {
   templatePath: string
   content: {
@@ -9,11 +15,12 @@ interface SaveTemplateRequest {
       [elementId: string]: string
     }
   }
+  addedComponents?: AddedComponent[]
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { templatePath, content }: SaveTemplateRequest = await request.json()
+    const { templatePath, content, addedComponents = [] }: SaveTemplateRequest = await request.json()
 
     if (!templatePath || !content) {
       return NextResponse.json(
@@ -29,8 +36,8 @@ export async function POST(request: NextRequest) {
       // Read the existing template file
       const existingContent = await readFile(templateFilePath, 'utf-8')
       
-      // Update the contentOverrides in the template
-      const updatedContent = updateTemplateContent(existingContent, content)
+      // Update the contentOverrides and addedComponents in the template
+      const updatedContent = updateTemplateContent(existingContent, content, addedComponents)
       
       // Write the updated content back to the file
       await writeFile(templateFilePath, updatedContent, 'utf-8')
@@ -57,27 +64,116 @@ export async function POST(request: NextRequest) {
 
 function updateTemplateContent(
   existingContent: string,
-  newContent: { [componentId: string]: { [elementId: string]: string } }
+  newContent: { [componentId: string]: { [elementId: string]: string } },
+  addedComponents: AddedComponent[]
 ): string {
-  // Find the contentOverrides declaration with its full structure
-  const contentOverridesRegex = /const contentOverrides = {[\s\S]*?^}/m
-  const match = existingContent.match(contentOverridesRegex)
+  let updatedContent = existingContent
+  
+  // Update contentOverrides - find the declaration and replace the entire object
+  const contentOverridesStartRegex = /const contentOverrides\s*=\s*\{/
+  const match = existingContent.match(contentOverridesStartRegex)
   
   if (!match) {
     // If no contentOverrides found, we need to add it
-    // Find the line after the imports and before the component
+    // Find the line after the imports and before the component function
     const importEnd = existingContent.lastIndexOf('import')
-    const nextLineAfterImports = existingContent.indexOf('\n', importEnd)
+    let insertPosition = existingContent.indexOf('\n', importEnd)
     
-    const beforeImportEnd = existingContent.substring(0, nextLineAfterImports + 1)
-    const afterImportEnd = existingContent.substring(nextLineAfterImports + 1)
+    // Find the component function declaration
+    const componentMatch = existingContent.match(/export\s+default\s+function/)
+    if (componentMatch && componentMatch.index) {
+      insertPosition = existingContent.lastIndexOf('\n', componentMatch.index)
+    }
     
-    const contentOverridesString = `\n// Template-specific content overrides\nconst contentOverrides = ${JSON.stringify(newContent, null, 2)}\n`
-    
-    return beforeImportEnd + contentOverridesString + afterImportEnd
+    if (insertPosition !== -1) {
+      const beforeContent = existingContent.substring(0, insertPosition + 1)
+      const afterContent = existingContent.substring(insertPosition + 1)
+      
+      const contentOverridesString = `// Template-specific content overrides\nconst contentOverrides = ${JSON.stringify(newContent, null, 2)}\n\n`
+      
+      updatedContent = beforeContent + contentOverridesString + afterContent
+    }
   } else {
-    // Replace the existing contentOverrides with the new content
-    const newContentOverridesString = `const contentOverrides = ${JSON.stringify(newContent, null, 2)}`
-    return existingContent.replace(contentOverridesRegex, newContentOverridesString)
+    // Find the start position
+    const startIndex = match.index! + match[0].length - 1 // Position of {
+    
+    // Find the matching closing brace by counting braces
+    let braceCount = 0
+    let endIndex = startIndex
+    let foundEnd = false
+    
+    for (let i = startIndex; i < existingContent.length; i++) {
+      if (existingContent[i] === '{') {
+        braceCount++
+      } else if (existingContent[i] === '}') {
+        braceCount--
+        if (braceCount === 0) {
+          endIndex = i
+          foundEnd = true
+          break
+        }
+      }
+    }
+    
+    if (foundEnd) {
+      // Replace from the start of const to the closing brace
+      const beforeContent = existingContent.substring(0, match.index!)
+      const afterContent = existingContent.substring(endIndex + 1)
+      const newContentOverridesString = `const contentOverrides = ${JSON.stringify(newContent, null, 2)}`
+      updatedContent = beforeContent + newContentOverridesString + afterContent
+    } else {
+      // Fallback to regex if brace matching fails
+      const contentOverridesRegex = /const contentOverrides\s*=\s*\{[\s\S]*?\n\}/m
+      const fallbackMatch = existingContent.match(contentOverridesRegex)
+      if (fallbackMatch) {
+        const newContentOverridesString = `const contentOverrides = ${JSON.stringify(newContent, null, 2)}`
+        updatedContent = existingContent.replace(contentOverridesRegex, newContentOverridesString)
+      }
+    }
   }
+  
+  // Update addedComponents
+  const addedComponentsRegex = /const addedComponents\s*:\s*AddedComponent\[\]\s*=\s*\[[\s\S]*?\]/m
+  const addedComponentsMatch = updatedContent.match(addedComponentsRegex)
+  
+  const addedComponentsString = `const addedComponents: AddedComponent[] = ${JSON.stringify(addedComponents, null, 2)}`
+  
+  // Add import for AddedComponent type if not present
+  if (!updatedContent.includes('AddedComponent') && addedComponents.length > 0) {
+    const lastImportIndex = updatedContent.lastIndexOf('import')
+    if (lastImportIndex !== -1) {
+      const nextLineAfterLastImport = updatedContent.indexOf('\n', lastImportIndex)
+      if (nextLineAfterLastImport !== -1) {
+        const beforeLastImport = updatedContent.substring(0, nextLineAfterLastImport + 1)
+        const afterLastImport = updatedContent.substring(nextLineAfterLastImport + 1)
+        
+        // Check if import already exists
+        if (!updatedContent.includes("from '@/lib/admin/types'")) {
+          updatedContent = beforeLastImport + "import { AddedComponent } from '@/lib/admin/types'\n" + afterLastImport
+        }
+      }
+    }
+  }
+  
+  if (!addedComponentsMatch) {
+    // Add addedComponents after contentOverrides
+    const contentOverridesEnd = updatedContent.indexOf('const contentOverrides')
+    if (contentOverridesEnd !== -1) {
+      // Find the end of contentOverrides (the closing brace)
+      const closingBraceIndex = updatedContent.indexOf('}', contentOverridesEnd)
+      const nextLineAfterContentOverrides = updatedContent.indexOf('\n', closingBraceIndex + 1)
+      
+      if (nextLineAfterContentOverrides !== -1) {
+        const beforeAddedComponents = updatedContent.substring(0, nextLineAfterContentOverrides + 1)
+        const afterAddedComponents = updatedContent.substring(nextLineAfterContentOverrides + 1)
+        
+        updatedContent = beforeAddedComponents + `\n// Dynamically added components\n${addedComponentsString}\n` + afterAddedComponents
+      }
+    }
+  } else {
+    // Replace existing addedComponents
+    updatedContent = updatedContent.replace(addedComponentsRegex, addedComponentsString)
+  }
+  
+  return updatedContent
 }

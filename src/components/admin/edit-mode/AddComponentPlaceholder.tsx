@@ -5,50 +5,8 @@ import { useInlineEdit } from '@/lib/admin/InlineEditContext'
 import { PlusIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
 import { PAGE_COMPONENTS } from '@/components/page'
 
-// Dynamic component renderer
-const DynamicComponent: React.FC<{ componentKey: string; props?: Record<string, unknown> }> = ({ componentKey, props }) => {
-  const [Component, setComponent] = useState<React.ComponentType<Record<string, unknown>> | null>(null)
-
-  useEffect(() => {
-    const componentDef = PAGE_COMPONENTS[componentKey as keyof typeof PAGE_COMPONENTS]
-    if (componentDef) {
-      componentDef.component().then(module => {
-        // Handle default export or named export
-        // For Intro, it's a named export, for Header it's default
-        const moduleExports = module as { default?: React.ComponentType<Record<string, unknown>>; [key: string]: React.ComponentType<Record<string, unknown>> | undefined }
-        let ComponentToUse: React.ComponentType<Record<string, unknown>> | undefined
-        
-        if (moduleExports.default) {
-          ComponentToUse = moduleExports.default
-        } else {
-          // Try to find the component by name in the module
-          ComponentToUse = moduleExports[componentDef.name] || moduleExports[componentKey]
-        }
-        
-        if (ComponentToUse) {
-          setComponent(() => ComponentToUse)
-        } else {
-          console.error(`Component ${componentKey} not found in module`)
-        }
-      }).catch(error => {
-        console.error(`Failed to load component ${componentKey}:`, error)
-      })
-    }
-  }, [componentKey])
-
-  if (!Component) {
-    return <div className="p-4 text-gray-500">Loading component...</div>
-  }
-
-  // Merge default props with provided props
-  const componentDef = PAGE_COMPONENTS[componentKey as keyof typeof PAGE_COMPONENTS]
-  const mergedProps = { ...componentDef?.defaultProps, ...props }
-
-  return <Component {...mergedProps} />
-}
-
 export const AddComponentPlaceholder: React.FC = () => {
-  const { isEditMode, addedComponents, addComponent } = useInlineEdit()
+  const { isEditMode, addComponent } = useInlineEdit()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -74,10 +32,6 @@ export const AddComponentPlaceholder: React.FC = () => {
     }
   }, [isDropdownOpen])
 
-  if (!isEditMode) {
-    return null
-  }
-
   const handleComponentClick = (componentKey: string) => {
     const componentDef = PAGE_COMPONENTS[componentKey as keyof typeof PAGE_COMPONENTS]
     const props = componentDef?.defaultProps || {}
@@ -85,25 +39,13 @@ export const AddComponentPlaceholder: React.FC = () => {
     setIsDropdownOpen(false)
   }
 
-  // Render added components first
-  const hasAddedComponents = addedComponents.length > 0
+  // Only show placeholder in edit mode
+  if (!isEditMode) {
+    return null
+  }
 
   return (
     <div className="mx-auto px-4 max-w-screen-xl" ref={dropdownRef}>
-      {/* Render added components */}
-      {hasAddedComponents && (
-        <div className="my-4">
-          {addedComponents.map((addedComponent) => (
-            <div key={addedComponent.id} className="my-4">
-              <DynamicComponent 
-                componentKey={addedComponent.componentKey} 
-                props={addedComponent.props}
-              />
-            </div>
-          ))}
-        </div>
-      )}
-
       {/* Placeholder for adding new component */}
       <div className="relative">
         <div className="border border-dashed border-gray-300 rounded-md p-8 my-4 bg-gray-50 hover:bg-gray-100 transition-colors">

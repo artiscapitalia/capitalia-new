@@ -7,18 +7,18 @@ import {
   InlineEditProviderProps,
   AddedComponent
 } from './types'
-import { AddComponentPlaceholder } from '@/components/admin/edit-mode'
 
 export const InlineEditContext = createContext<InlineEditContextType | undefined>(undefined)
 
 export const InlineEditProvider: React.FC<InlineEditProviderProps> = ({
   children,
   templatePath,
-  initialContent = {}
+  initialContent = {},
+  initialComponents = []
 }) => {
   const [isEditMode, setIsEditMode] = useState(false)
   const [templateContent, setTemplateContent] = useState<TemplateContent>(initialContent)
-  const [addedComponents, setAddedComponents] = useState<AddedComponent[]>([])
+  const [addedComponents, setAddedComponents] = useState<AddedComponent[]>(initialComponents)
 
   const toggleEditMode = () => {
     setIsEditMode(!isEditMode)
@@ -57,7 +57,8 @@ export const InlineEditProvider: React.FC<InlineEditProviderProps> = ({
         },
         body: JSON.stringify({
           templatePath,
-          content: templateContent
+          content: templateContent,
+          addedComponents: addedComponents
         })
       })
 
@@ -84,7 +85,6 @@ export const InlineEditProvider: React.FC<InlineEditProviderProps> = ({
         templatePath
       }}
     >
-      <AddComponentPlaceholder />
       {children}
     </InlineEditContext.Provider>
   )
