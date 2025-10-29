@@ -34,7 +34,7 @@ export const InlineEditProvider: React.FC<InlineEditProviderProps> = ({
     }))
   }
 
-  const addComponent = (componentKey: string, props?: Record<string, any>) => {
+  const addComponent = (componentKey: string, props?: Record<string, unknown>) => {
     const newComponent: AddedComponent = {
       id: `${componentKey}-${Date.now()}`,
       componentKey,

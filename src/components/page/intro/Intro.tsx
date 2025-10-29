@@ -1,9 +1,10 @@
 import React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { EditableText } from '@/components/admin/edit-mode'
 import { IntroProps } from './types'
 
-export const Intro: React.FC<IntroProps> = ({ lang = 'lv', contentOverrides }) => {
+export const Intro: React.FC<IntroProps> = ({ lang = 'lv' }) => {
     return (
         <div className="mx-auto px-4 max-w-screen-xl">
             <div className="heading-content relative">
@@ -41,8 +42,10 @@ export const Intro: React.FC<IntroProps> = ({ lang = 'lv', contentOverrides }) =
                             backgroundImage: 'url("/images/consultation_card_2.png")'
                         }}
                     >
-                        <img
+                        <Image
                             src="/images/member-photo-overlay-2.png"
+                            width={152}
+                            height={180}
                             className="w-full h-full object-cover"
                             alt="Consultation"
                         />

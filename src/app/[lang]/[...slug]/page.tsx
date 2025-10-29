@@ -1,11 +1,10 @@
-import { notFound } from 'next/navigation'
 import React from 'react'
 
 interface PageProps {
-  params: {
+  params: Promise<{
     lang: string
     slug: string[]
-  }
+  }>
 }
 
 // Funkcija, kas pārvērš URL ceļu template ceļā
@@ -27,7 +26,7 @@ async function loadTemplate(lang: string, templatePath: string) {
 }
 
 export default async function Page({ params }: PageProps) {
-  const { lang, slug } = params
+  const { lang, slug } = await params
   
   // Izveido template ceļu no URL ceļa
   const templatePath = getTemplatePath(slug)

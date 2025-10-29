@@ -20,14 +20,14 @@ export interface ComponentMeta {
   description?: string;
   category?: string;
   editable?: boolean;
-  defaultProps?: Record<string, any>;
+  defaultProps?: Record<string, unknown>;
 }
 
 // Page component registration interface
 export interface PageComponentDefinition {
-  component: React.ComponentType<any>;
+  component: React.ComponentType<Record<string, unknown>>;
   meta: ComponentMeta;
-  props?: Record<string, any>;
+  props?: Record<string, unknown>;
 }
 
 // Page structure for saving/loading
@@ -38,7 +38,7 @@ export interface PageStructure {
   components: Array<{
     id: string;
     type: string;
-    props: Record<string, any>;
+    props: Record<string, unknown>;
     order: number;
   }>;
   meta?: {

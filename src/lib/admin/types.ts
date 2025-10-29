@@ -9,7 +9,7 @@ export interface TemplateContent {
 export interface AddedComponent {
   id: string
   componentKey: string
-  props?: Record<string, any>
+  props?: Record<string, unknown>
 }
 
 export interface InlineEditContextType {
@@ -18,7 +18,7 @@ export interface InlineEditContextType {
   addedComponents: AddedComponent[]
   toggleEditMode: () => void
   updateContent: (componentId: string, elementId: string, content: string) => void
-  addComponent: (componentKey: string, props?: Record<string, any>) => void
+  addComponent: (componentKey: string, props?: Record<string, unknown>) => void
   saveTemplate: () => Promise<void>
   templatePath?: string
 }

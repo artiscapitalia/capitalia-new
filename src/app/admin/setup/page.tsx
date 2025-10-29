@@ -20,7 +20,7 @@ export default function AdminSetupPage() {
 
     try {
       // Try to sign up a new user
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -37,7 +37,7 @@ export default function AdminSetupPage() {
       } else {
         setMessage('Admin user created successfully! Check your email to confirm.')
       }
-    } catch (err) {
+    } catch {
       setError('Failed to create admin user')
     } finally {
       setLoading(false)
@@ -60,7 +60,7 @@ export default function AdminSetupPage() {
           window.location.href = '/admin/dashboard'
         }, 1000)
       }
-    } catch (err) {
+    } catch {
       setError('Failed to sign in')
     } finally {
       setLoading(false)

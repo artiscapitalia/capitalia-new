@@ -54,7 +54,7 @@ export const EditableText: React.FC<EditableTextProps> = ({
     }
   }
 
-  const Tag = tag as keyof JSX.IntrinsicElements
+  const Tag = tag as keyof React.JSX.IntrinsicElements
 
   if (isEditing) {
     const isMultiline = shouldUseMultilineInput(currentContent)

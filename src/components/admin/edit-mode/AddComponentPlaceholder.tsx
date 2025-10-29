@@ -6,8 +6,8 @@ import { PlusIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
 import { PAGE_COMPONENTS } from '@/components/page'
 
 // Dynamic component renderer
-const DynamicComponent: React.FC<{ componentKey: string; props?: Record<string, any> }> = ({ componentKey, props }) => {
-  const [Component, setComponent] = useState<React.ComponentType<any> | null>(null)
+const DynamicComponent: React.FC<{ componentKey: string; props?: Record<string, unknown> }> = ({ componentKey, props }) => {
+  const [Component, setComponent] = useState<React.ComponentType<Record<string, unknown>> | null>(null)
 
   useEffect(() => {
     const componentDef = PAGE_COMPONENTS[componentKey as keyof typeof PAGE_COMPONENTS]
@@ -15,8 +15,8 @@ const DynamicComponent: React.FC<{ componentKey: string; props?: Record<string, 
       componentDef.component().then(module => {
         // Handle default export or named export
         // For Intro, it's a named export, for Header it's default
-        const moduleExports = module as any
-        let ComponentToUse: React.ComponentType<any> | undefined
+        const moduleExports = module as { default?: React.ComponentType<Record<string, unknown>>; [key: string]: React.ComponentType<Record<string, unknown>> | undefined }
+        let ComponentToUse: React.ComponentType<Record<string, unknown>> | undefined
         
         if (moduleExports.default) {
           ComponentToUse = moduleExports.default
@@ -54,7 +54,7 @@ export const AddComponentPlaceholder: React.FC = () => {
 
   // Get only editable components
   const editableComponents = Object.entries(PAGE_COMPONENTS).filter(
-    ([_, component]) => component.editable === true
+    ([, component]) => component.editable === true
   )
 
   // Close dropdown when clicking outside

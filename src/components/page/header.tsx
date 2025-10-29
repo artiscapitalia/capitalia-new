@@ -36,8 +36,8 @@ export interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({
   id = 'capitalia-header',
   className = 'mb-12',
-  editable = false,
-  onEdit,
+  editable: _editable = false, // eslint-disable-line @typescript-eslint/no-unused-vars
+  onEdit: _onEdit, // eslint-disable-line @typescript-eslint/no-unused-vars
   logo = {
     desktop: '/images/capitalia-logo.png',
     mobile: '/images/capitalia-logo.png',
@@ -81,12 +81,6 @@ const Header: React.FC<HeaderProps> = ({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
-
-  const handleContentEdit = (field: string, value: string): void => {
-    if (editable && onEdit) {
-      onEdit(field, value);
-    }
-  };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);

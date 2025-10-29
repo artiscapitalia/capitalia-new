@@ -2,13 +2,15 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+import type { SupabaseClient } from '@supabase/supabase-js'
+
 // Default language and supported languages cache
 const DEFAULT_LANGUAGE = 'en'
 let supportedLanguages: string[] = []
 let lastLanguageFetch = 0
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
 
-async function getSupportedLanguages(supabase: any): Promise<string[]> {
+async function getSupportedLanguages(supabase: SupabaseClient): Promise<string[]> {
   const now = Date.now()
   
   // Return cached languages if still valid
@@ -23,7 +25,7 @@ async function getSupportedLanguages(supabase: any): Promise<string[]> {
       .eq('is_active', true)
     
     if (!error && data) {
-      supportedLanguages = data.map((lang: any) => lang.code)
+      supportedLanguages = data.map((lang: { code: string }) => lang.code)
       lastLanguageFetch = now
       return supportedLanguages
     }
@@ -57,6 +59,7 @@ function isLanguagePath(pathname: string): { isLangPath: boolean; lang?: string;
 }
 
 export async function middleware(req: NextRequest) {
+  const pathname = req.nextUrl.pathname
   let response = NextResponse.next({
     request: {
       headers: req.headers,
@@ -68,41 +71,29 @@ export async function middleware(req: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return req.cookies.get(name)?.value
+        getAll() {
+          return req.cookies.getAll().map(cookie => ({
+            name: cookie.name,
+            value: cookie.value,
+          }))
         },
-        set(name: string, value: string, options: any) {
-          req.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: req.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-        },
-        remove(name: string, options: any) {
-          req.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: req.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            req.cookies.set({
+              name,
+              value,
+              ...options,
+            })
+            response = NextResponse.next({
+              request: {
+                headers: req.headers,
+              },
+            })
+            response.cookies.set({
+              name,
+              value,
+              ...options,
+            })
           })
         },
       },
@@ -144,9 +135,7 @@ export async function middleware(req: NextRequest) {
   // Protect admin routes
   if (pathname.startsWith('/admin') && 
       pathname !== '/admin/login' && 
-      pathname !== '/admin/setup' &&
-      pathname !== '/admin/auth-test' &&
-      pathname !== '/admin/test-functionality') {
+      pathname !== '/admin/setup') {
     if (!session) {
       // Redirect to login if not authenticated
       return NextResponse.redirect(new URL('/admin/login', req.url))

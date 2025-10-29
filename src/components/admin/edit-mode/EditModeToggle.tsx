@@ -13,7 +13,7 @@ export const EditModeToggle: React.FC = () => {
         try {
             await saveTemplate()
             showAlert({ type: 'success', message: 'Template saved successfully!', position: 'top' })    
-        } catch (error) {
+        } catch {
             showAlert({ type: 'error', message: 'Failed to save template', position: 'top' })
         }
     }
