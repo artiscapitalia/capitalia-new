@@ -2,6 +2,8 @@
 export { default as Header } from './header';
 export type { HeaderProps, NavigationItem } from './header';
 export { Intro } from './intro';
+export { Spacing } from './spacing';
+export type { SpacingProps } from './spacing';
 
 // Types exports
 export type {
@@ -33,6 +35,16 @@ export const PAGE_COMPONENTS = {
         editable: true,
         defaultProps: {
             lang: 'lv',
+        },
+    },
+    spacing: {
+        name: 'Spacing',
+        description: 'Add vertical spacing between components',
+        component: () => import('./spacing'),
+        category: 'layout',
+        editable: true,
+        defaultProps: {
+            height: 40,
         },
     },
 } as const;
