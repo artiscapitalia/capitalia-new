@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readTemplateContent, saveTemplateContent } from '@/lib/admin/templateStorage'
-import { createTemplateWithWrapper } from '@/components/admin/edit-mode/TemplateWrapper'
+import { generateTemplateCode } from '@/lib/admin/templateGenerator'
 import { readFile } from 'fs/promises'
 import { join } from 'path'
 
@@ -111,13 +111,14 @@ export async function POST(request: NextRequest) {
 /**
  * Create a template from scratch when blob doesn't exist on Vercel
  * Uses TemplateWrapper structure for minimal boilerplate
+ * Uses generateTemplateCode directly (server-side compatible)
  */
 function createTemplateFromScratch(
   templatePath: string,
   content: { [componentId: string]: { [elementId: string]: string } },
   addedComponents: AddedComponent[]
 ): string {
-  return createTemplateWithWrapper(templatePath, content, addedComponents)
+  return generateTemplateCode(templatePath, content, addedComponents)
 }
 
 function updateTemplateContent(
