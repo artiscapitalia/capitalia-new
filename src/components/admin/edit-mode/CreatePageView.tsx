@@ -35,7 +35,7 @@ export const CreatePageView: React.FC<CreatePageViewProps> = ({ templatePath, la
           {/* Empty page for creating - components can be added here */}
         </TemplateWrapper>
       </div>
-      <CreatePageButton templatePath={templatePath} lang={lang} />
+      <CreatePageButton templatePath={templatePath} />
     </InlineEditProvider>
   )
 }

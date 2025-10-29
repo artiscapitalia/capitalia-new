@@ -9,7 +9,6 @@ import { useAlert } from '@/contexts/AlertContext'
 
 interface CreatePageButtonProps {
   templatePath: string
-  lang?: string
 }
 
 // Internal component that uses hooks - only rendered when in InlineEditProvider
@@ -102,10 +101,7 @@ const CreatePageButtonWrapper: React.FC<{ templatePath: string; isCreateMode: bo
   return <CreatePageButtonWithContext templatePath={templatePath} />
 }
 
-export const CreatePageButton: React.FC<CreatePageButtonProps> = ({ templatePath, lang }) => {
-  // lang is kept for API compatibility but not currently used
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  void lang
+export const CreatePageButton: React.FC<CreatePageButtonProps> = ({ templatePath }) => {
   const { isAdmin } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()

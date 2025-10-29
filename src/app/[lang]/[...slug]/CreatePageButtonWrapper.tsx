@@ -18,6 +18,6 @@ export const CreatePageButtonWrapper: React.FC<CreatePageButtonWrapperProps> = (
     return null
   }
 
-  return <CreatePageButton templatePath={templatePath} lang={lang} />
+  return <CreatePageButton templatePath={templatePath} />
 }
 
