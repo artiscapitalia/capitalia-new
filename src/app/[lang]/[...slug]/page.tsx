@@ -3,6 +3,8 @@ import { CreatePageView } from '@/components/admin/edit-mode/CreatePageView'
 import { NotFoundMessage } from './NotFoundMessage'
 import { CreatePageButtonWrapper } from './CreatePageButtonWrapper'
 import { readTemplateContent } from '@/lib/admin/templateStorage'
+import { parseTemplate, ParsedTemplateData } from '@/lib/admin/templateParser'
+import { DynamicTemplate } from '@/lib/admin/DynamicTemplate'
 import { writeFile, mkdir } from 'fs/promises'
 import { join, dirname } from 'path'
 import { existsSync } from 'fs'
@@ -14,15 +16,53 @@ interface PageProps {
   }>
 }
 
+// Template loading result can be either a component or parsed data for dynamic rendering
+type TemplateLoadResult = 
+  | React.ComponentType<{ lang: string }>
+  | { type: 'dynamic'; data: ParsedTemplateData }
+  | null
+
 // Funkcija, kas pārvērš URL ceļu template ceļā
 function getTemplatePath(slugPath: string[]): string {
   // /finansejums/finansejums-uznemumam/ -> finansejums/finansejums-uznemumam
   return slugPath.join('/')
 }
 
+/**
+ * Checks if running on Vercel
+ */
+function isVercel(): boolean {
+  return !!process.env.VERCEL && process.env.VERCEL === '1'
+}
+
 // Funkcija, kas ielādē template komponenti
-async function loadTemplate(lang: string, templatePath: string) {
-  // First try to load from filesystem (works both locally and on Vercel if synced during build)
+async function loadTemplate(lang: string, templatePath: string): Promise<TemplateLoadResult> {
+  const isVercelEnv = isVercel()
+  const fullTemplatePath = `${lang}/${templatePath}`
+
+  // On Vercel: Check blob storage FIRST before trying filesystem
+  if (isVercelEnv) {
+    try {
+      const templateContent = await readTemplateContent(fullTemplatePath)
+      
+      if (templateContent) {
+        // Template found in blob storage, parse it and return parsed data for dynamic rendering
+        try {
+          const parsedData = parseTemplate(templateContent)
+          console.log('Template loaded from blob storage:', fullTemplatePath)
+          return { type: 'dynamic', data: parsedData }
+        } catch (parseError) {
+          console.error('Error parsing template from blob storage:', parseError)
+          // Fall through to try filesystem
+        }
+      }
+    } catch (blobError) {
+      // Error reading from blob, fall through to try filesystem
+      console.log('Template not found in blob storage, trying filesystem:', blobError)
+    }
+  }
+
+  // Try to load from filesystem (works both locally and on Vercel if synced during build)
   try {
     const templateModule = await import(`@/templates/${lang}/${templatePath}.tsx`)
     return templateModule.default
@@ -30,14 +70,8 @@ async function loadTemplate(lang: string, templatePath: string) {
     const errorObj = error as { code?: string; message?: string }
     if (errorObj?.code === 'MODULE_NOT_FOUND' || errorObj?.message?.includes('Cannot find module')) {
       // Template doesn't exist in filesystem
-      // On Vercel, if template exists in blob storage but not in filesystem,
-      // it needs to be synced during build time (not runtime, as filesystem is read-only)
-      // For local development, we can try to sync from blob to filesystem
       
-      const isVercel = !!process.env.VERCEL && process.env.VERCEL === '1'
-      const fullTemplatePath = `${lang}/${templatePath}`
-      
-      if (!isVercel) {
+      if (!isVercelEnv) {
         // Local development: try to sync from blob storage to filesystem if it exists
         try {
           const templateContent = await readTemplateContent(fullTemplatePath)
@@ -86,10 +120,10 @@ export default async function Page({ params }: PageProps) {
   const templatePath = getTemplatePath(slug)
   
   // Mēģinām ielādēt template komponenti
-  const TemplateComponent = await loadTemplate(lang, templatePath)
+  const templateResult = await loadTemplate(lang, templatePath)
   
   // Ja template nav atrasts, rādām 404 ar Create page pogu vai create mode
-  if (!TemplateComponent) {
+  if (!templateResult) {
     return (
       <main className="min-h-screen bg-white">
         <Suspense fallback={
@@ -117,11 +151,22 @@ export default async function Page({ params }: PageProps) {
     )
   }
 
-  // Renderējam atrasto template no filesystem
-  return (
-    <main className="min-h-screen bg-white">
-      <TemplateComponent lang={lang} />
-    </main>
-  )
+  // Renderējam template: vai nu no filesystem vai dinamiskais no blob storage
+  if ('type' in templateResult && templateResult.type === 'dynamic') {
+    // Template loaded from blob storage, use dynamic renderer
+    return (
+      <main className="min-h-screen bg-white">
+        <DynamicTemplate lang={lang} templateData={templateResult.data} />
+      </main>
+    )
+  } else {
+    // Template loaded from filesystem, use imported component
+    const TemplateComponent = templateResult as React.ComponentType<{ lang: string }>
+    return (
+      <main className="min-h-screen bg-white">
+        <TemplateComponent lang={lang} />
+      </main>
+    )
+  }
 }
 
