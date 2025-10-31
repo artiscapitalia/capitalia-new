@@ -4,7 +4,7 @@ import React from 'react'
 import { useSearchParams } from 'next/navigation'
 import { InlineEditProvider } from '@/lib/admin/InlineEditContext'
 import { TemplateWrapper } from './TemplateWrapper'
-import { CreatePageButton } from './CreatePageButton'
+import { EditModeToggle } from './EditModeToggle'
 
 interface CreatePageViewProps {
     templatePath: string
@@ -32,7 +32,7 @@ export const CreatePageView: React.FC<CreatePageViewProps> = ({ templatePath }) 
             <div className="min-h-screen">
                 <TemplateWrapper className={templateClassName} templatePath={templatePath}></TemplateWrapper>
             </div>
-            <CreatePageButton templatePath={templatePath} />
+            <EditModeToggle templatePath={templatePath} />
         </InlineEditProvider>
     )
 }

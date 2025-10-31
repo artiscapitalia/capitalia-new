@@ -87,6 +87,54 @@ export const InlineEditProvider: React.FC<InlineEditProviderProps> = ({
     setAddedComponents(prev => [...prev, newComponent])
   }
 
+  const insertComponentBefore = (targetComponentId: string, componentKey: string, props?: Record<string, unknown>) => {
+    const newComponent: AddedComponent = {
+      id: `${componentKey}-${Date.now()}`,
+      componentKey,
+      props
+    }
+    setAddedComponents(prev => {
+      const index = prev.findIndex(comp => comp.id === targetComponentId)
+      if (index === -1) {
+        // If target not found, add to end
+        return [...prev, newComponent]
+      }
+      const newArray = [...prev]
+      newArray.splice(index, 0, newComponent)
+      return newArray
+    })
+  }
+
+  const insertComponentAfter = (targetComponentId: string, componentKey: string, props?: Record<string, unknown>) => {
+    const newComponent: AddedComponent = {
+      id: `${componentKey}-${Date.now()}`,
+      componentKey,
+      props
+    }
+    setAddedComponents(prev => {
+      const index = prev.findIndex(comp => comp.id === targetComponentId)
+      if (index === -1) {
+        // If target not found, add to end
+        return [...prev, newComponent]
+      }
+      const newArray = [...prev]
+      newArray.splice(index + 1, 0, newComponent)
+      return newArray
+    })
+  }
+
+  const removeComponent = (componentId: string) => {
+    setAddedComponents(prev => prev.filter(comp => comp.id !== componentId))
+  }
+
+  const toggleComponentVisibility = (componentId: string) => {
+    setAddedComponents(prev => prev.map(comp => 
+      comp.id === componentId 
+        ? { ...comp, isHidden: !comp.isHidden }
+        : comp
+    ))
+  }
+
   const saveTemplate = async () => {
     if (!templatePath) {
       console.error('No template path provided')
@@ -143,6 +191,10 @@ export const InlineEditProvider: React.FC<InlineEditProviderProps> = ({
         toggleEditMode,
         updateContent,
         addComponent,
+        insertComponentBefore,
+        insertComponentAfter,
+        removeComponent,
+        toggleComponentVisibility,
         saveTemplate,
         templatePath
       }}

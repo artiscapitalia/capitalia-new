@@ -10,6 +10,7 @@ export interface AddedComponent {
   id: string
   componentKey: string
   props?: Record<string, unknown>
+  isHidden?: boolean
 }
 
 export interface InlineEditContextType {
@@ -19,6 +20,10 @@ export interface InlineEditContextType {
   toggleEditMode: () => void
   updateContent: (componentId: string, elementId: string, content: string) => void
   addComponent: (componentKey: string, props?: Record<string, unknown>) => void
+  insertComponentBefore: (targetComponentId: string, componentKey: string, props?: Record<string, unknown>) => void
+  insertComponentAfter: (targetComponentId: string, componentKey: string, props?: Record<string, unknown>) => void
+  removeComponent: (componentId: string) => void
+  toggleComponentVisibility: (componentId: string) => void
   saveTemplate: () => Promise<void>
   templatePath?: string
 }

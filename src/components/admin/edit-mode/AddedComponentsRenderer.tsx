@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useInlineEdit } from '@/lib/admin/InlineEditContext'
 import { PAGE_COMPONENTS } from '@/components/page'
 import { DynamicModule } from './types'
+import { ComponentWrapper } from './ComponentWrapper'
 
 // Dynamic component renderer
 const DynamicComponent: React.FC<{ componentKey: string; props?: Record<string, unknown> }> = ({ componentKey, props }) => {
@@ -58,12 +59,18 @@ export const AddedComponentsRenderer: React.FC = () => {
     return (
         <div className="mx-auto max-w-screen-xl">
             {addedComponents.map((addedComponent) => (
-                <div key={addedComponent.id} className="my-4">
-                    <DynamicComponent
-                        componentKey={addedComponent.componentKey}
-                        props={addedComponent.props}
-                    />
-                </div>
+                <ComponentWrapper 
+                    key={addedComponent.id} 
+                    componentId={addedComponent.id}
+                    isHidden={addedComponent.isHidden}
+                >
+                    <div className="my-4">
+                        <DynamicComponent
+                            componentKey={addedComponent.componentKey}
+                            props={addedComponent.props}
+                        />
+                    </div>
+                </ComponentWrapper>
             ))}
         </div>
     )

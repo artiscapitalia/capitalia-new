@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { AddedComponentsRenderer } from './AddedComponentsRenderer'
-import { AddComponentPlaceholder } from './AddComponentPlaceholder'
+import { EditModeWrapper } from './EditModeWrapper'
 // Import helper functions from template generator to ensure structure consistency
 import { getTemplateClassName, generateTemplateCode } from '@/lib/admin/templateGenerator'
 import { AddedComponent } from '@/lib/admin/types'
@@ -22,16 +22,15 @@ export const TemplateWrapper: React.FC<TemplateWrapperProps> = ({ className, tem
   const validatedClassName = templatePath ? getTemplateClassName(templatePath) : className
 
   return (
-    <div className={validatedClassName}>
-      {/* Render dynamically added components */}
-      <AddedComponentsRenderer />
-    
-      {/* Add component placeholder (only visible in edit mode) */}
-      <AddComponentPlaceholder />
-      
-      {/* Original template content */}
-      {children}
-    </div>
+    <EditModeWrapper>
+      <div className={validatedClassName}>
+        {/* Render dynamically added components */}
+        <AddedComponentsRenderer />
+        
+        {/* Original template content */}
+        {children}
+      </div>
+    </EditModeWrapper>
   )
 }
 
