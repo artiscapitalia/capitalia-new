@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { useSearchParams } from 'next/navigation'
 
 interface NotFoundMessageProps {
     templatePath: string
@@ -9,8 +8,6 @@ interface NotFoundMessageProps {
 }
 
 export const NotFoundMessage: React.FC<NotFoundMessageProps> = ({ templatePath, slug }) => {
-    const searchParams = useSearchParams()
-    
     return (
         <div className="flex items-center justify-center min-h-screen">
             <div className="text-center">

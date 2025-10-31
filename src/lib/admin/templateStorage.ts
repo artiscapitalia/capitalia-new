@@ -100,19 +100,21 @@ function createComponentFromTemplateData(
     const componentKey = `${templateData.templatePath}-${contentHash.length}`
 
     return function TemplateFromJson() {
+        const wrapperElement = React.createElement(
+            TemplateWrapper,
+            { className: templateData.className },
+            React.createElement(EditModeToggle)
+        )
+
         return React.createElement(
             InlineEditProvider,
             {
                 key: componentKey,
                 templatePath: templateData.templatePath,
                 initialContent: templateData.contentOverrides,
-                initialComponents: templateData.addedComponents,
-                children: React.createElement(
-                    TemplateWrapper,
-                    { className: templateData.className },
-                    React.createElement(EditModeToggle)
-                )
-            }
+                initialComponents: templateData.addedComponents
+            } as any,
+            wrapperElement
         )
     }
 }
