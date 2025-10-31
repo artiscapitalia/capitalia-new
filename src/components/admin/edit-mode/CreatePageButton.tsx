@@ -86,7 +86,7 @@ export const CreatePageButton: React.FC<CreatePageButtonProps> = ({ templatePath
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="text-white p-3 rounded-full transition-colors hover:bg-gray-700 disabled:opacity-50"
+                        className="text-white p-3 rounded-full transition-colors hover:bg-gray-700 disabled:opacity-50 cursor-pointer"
                         title="Save page"
                     >
                         <CheckIcon className="w-5 h-5" />
@@ -94,7 +94,7 @@ export const CreatePageButton: React.FC<CreatePageButtonProps> = ({ templatePath
                     <button
                         onClick={handleCancel}
                         disabled={isSaving}
-                        className="text-white p-3 rounded-full transition-colors hover:bg-gray-700 disabled:opacity-50"
+                        className="text-white p-3 rounded-full transition-colors hover:bg-gray-700 disabled:opacity-50 cursor-pointer"
                         title="Cancel"
                     >
                         <XMarkIcon className="w-5 h-5" />
@@ -117,7 +117,7 @@ export const CreatePageButton: React.FC<CreatePageButtonProps> = ({ templatePath
         <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 items-center w-full max-w-sm">
             <button
                 onClick={handleCreatePage}
-                className="bg-black hover:bg-gray-800 text-white px-6 py-4 rounded-full transition-colors flex items-center gap-3"
+                className="bg-black hover:bg-gray-800 text-white px-6 py-4 rounded-full transition-colors flex items-center gap-3 cursor-pointer"
                 title="Create page"
             >
                 <PlusIcon className="w-5 h-5" />

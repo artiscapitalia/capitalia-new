@@ -6,5 +6,7 @@ export { AddedComponentsRenderer } from './AddedComponentsRenderer'
 export { TemplateWrapper } from './TemplateWrapper'
 export { CreatePageButton } from './CreatePageButton'
 export { CreatePageView } from './CreatePageView'
-export type { EditableTextProps } from './types'
+export { ComponentPreviewModal } from './ComponentPreviewModal'
+export { ComponentPreview } from './ComponentPreview'
+export type { EditableTextProps, ComponentPreviewModalProps } from './types'
 

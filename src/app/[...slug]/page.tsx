@@ -10,6 +10,9 @@ interface PageProps {
     params: Promise<{
         slug: string[]
     }>
+    searchParams: Promise<{
+        create?: string
+    }>
 }
 
 // Function that converts URL path to template path
@@ -33,8 +36,10 @@ async function loadTemplate(path: string) {
     return await readTemplateContent(path)
 }
 
-export default async function Page({ params }: PageProps) {
+export default async function Page({ params, searchParams }: PageProps) {
     const { slug } = await params
+    const { create } = await searchParams
+    const isCreateMode = create === 'true'
 
     // Create template path from URL path
     const templatePath = getTemplatePath(slug)
@@ -56,13 +61,15 @@ export default async function Page({ params }: PageProps) {
                     <CreatePageView templatePath={templatePath} />
                 </Suspense>
 
-                <Suspense fallback={null}>
-                    <NotFoundMessage
-                        templatePath={templatePath}
-                        slug={slug}
-                    />
-                    <CreatePageButton templatePath={templatePath} />
-                </Suspense>
+                {!isCreateMode && (
+                    <Suspense fallback={null}>
+                        <NotFoundMessage
+                            templatePath={templatePath}
+                            slug={slug}
+                        />
+                        <CreatePageButton templatePath={templatePath} />
+                    </Suspense>
+                )}
             </main>
         )
     }

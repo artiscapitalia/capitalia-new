@@ -68,7 +68,7 @@ export const EditableText: React.FC<EditableTextProps> = ({
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleKeyDown}
             onBlur={handleSave}
-            className={`${className} inline-edit-textarea border-2 border-blue-500 rounded px-2 py-1 resize-none`}
+            className={`${className} min-w-[200px] min-h-[60px] w-full font-inherit text-inherit leading-inherit bg-white outline-none shadow-[0_2px_8px_rgba(0,0,0,0.1)] border-2 border-blue-500 rounded px-2 py-1 resize-none`}
             rows={3}
           />
         </div>
@@ -83,7 +83,7 @@ export const EditableText: React.FC<EditableTextProps> = ({
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleKeyDown}
             onBlur={handleSave}
-            className={`${className} inline-edit-input border-2 border-blue-500 rounded px-2 py-1`}
+            className={`${className} min-w-[200px] font-inherit text-inherit leading-inherit bg-white outline-none shadow-[0_2px_8px_rgba(0,0,0,0.1)] border-2 border-blue-500 rounded px-2 py-1`}
           />
         </div>
       )

@@ -33,14 +33,14 @@ export const EditModeToggle: React.FC = () => {
                 <div className="bg-black hover:bg-gray-800 rounded-full px-4 py-2 flex items-center justify-center gap-2">
                     <button
                         onClick={handleSave}
-                        className="text-white p-3 rounded-full transition-colors hover:bg-gray-700"
+                        className="text-white p-3 rounded-full transition-colors hover:bg-gray-700 cursor-pointer"
                         title="Save changes"
                     >
                         <CheckIcon className="w-5 h-5" />
                     </button>
                     <button
                         onClick={toggleEditMode}
-                        className="text-white p-3 rounded-full transition-colors hover:bg-gray-700"
+                        className="text-white p-3 rounded-full transition-colors hover:bg-gray-700 cursor-pointer"
                         title="Cancel editing"
                     >
                         <XMarkIcon className="w-5 h-5" />
@@ -51,7 +51,7 @@ export const EditModeToggle: React.FC = () => {
             {!isEditMode && (
                 <button
                     onClick={toggleEditMode}
-                    className="bg-black hover:bg-gray-800 text-white px-6 py-4 rounded-full transition-colors flex items-center gap-3"
+                    className="bg-black hover:bg-gray-800 text-white px-6 py-4 rounded-full transition-colors flex items-center gap-3 cursor-pointer"
                     title="Enable edit mode"
                 >
                     <PencilIcon className="w-5 h-5" />

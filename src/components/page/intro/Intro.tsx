@@ -7,8 +7,8 @@ import { IntroProps } from './types'
 export const Intro: React.FC<IntroProps> = ({ lang = 'lv' }) => {
     return (
         <div className="mx-auto px-4 max-w-screen-xl">
-            <div className="heading-content relative">
-                <h1 className="text-gray-800 mb-16 font-serif">
+            <div className="relative">
+                <h1 className="text-gray-800 mb-16 font-serif after:content-[''] after:block after:w-[95px] after:h-[3px] after:bg-[#0172E3] after:relative after:top-10">
                     <EditableText 
                         componentId="intro"
                         elementId="heading-line1"
@@ -25,7 +25,7 @@ export const Intro: React.FC<IntroProps> = ({ lang = 'lv' }) => {
                     />
                 </h1>
 
-                <div className="intro text-gray-600">
+                <div className="mb-[30px] mr-[250px] font-serif text-2xl font-light text-gray-600">
                     <EditableText 
                         componentId="intro"
                         elementId="description"
@@ -35,7 +35,7 @@ export const Intro: React.FC<IntroProps> = ({ lang = 'lv' }) => {
                 </div>
 
                 {/* Absolutely positioned right image */}
-                <div className="absolute-image-block">
+                <div className="absolute top-[120px] right-0 z-10">
                     <div
                         className="relative w-38 h-45 rounded-xl overflow-hidden bg-cover bg-center bg-no-repeat transition-opacity duration-300"
                         style={{
@@ -54,7 +54,7 @@ export const Intro: React.FC<IntroProps> = ({ lang = 'lv' }) => {
 
                 <Link
                     href={`/${lang}/apply-loan`}
-                    className="apply-btn apply-btn-blue apply-btn-large"
+                    className="inline-block px-[18px] py-3 text-lg font-semibold text-white bg-[#1375e0] border border-[#1375e0] rounded no-underline outline-none"
                 >
                     <EditableText 
                         componentId="intro"

@@ -2,6 +2,8 @@
 export { default as Header } from './header';
 export type { HeaderProps, NavigationItem } from './header';
 export { Intro } from './intro';
+export { OurAdvantages } from './our-advantages';
+export type { OurAdvantagesProps, AdvantageItem } from './our-advantages';
 export { Spacing } from './spacing';
 export type { SpacingProps } from './spacing';
 
@@ -31,6 +33,16 @@ export const PAGE_COMPONENTS = {
         name: 'Intro',
         description: 'Introduction section with heading, description, image and call-to-action button',
         component: () => import('./intro'),
+        category: 'content',
+        editable: true,
+        defaultProps: {
+            lang: 'lv',
+        },
+    },
+    'our-advantages': {
+        name: 'OurAdvantages',
+        description: 'Section displaying company advantages with icons, titles, descriptions and call-to-action button',
+        component: () => import('./our-advantages'),
         category: 'content',
         editable: true,
         defaultProps: {

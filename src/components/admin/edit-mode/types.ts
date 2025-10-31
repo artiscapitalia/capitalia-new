@@ -16,3 +16,9 @@ export interface DynamicModule {
   [key: string]: React.ComponentType<Record<string, unknown>> | unknown
 }
 
+export interface ComponentPreviewModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onSelectComponent: (componentKey: string) => void
+}
+
