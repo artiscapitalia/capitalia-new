@@ -5,8 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useInlineEdit } from '@/lib/admin/InlineEditContext'
 import { PencilIcon, CheckIcon, XMarkIcon, PlusIcon } from '@heroicons/react/24/solid'
 import { useAlert } from '@/contexts/AlertContext'
-import { ComponentPreviewModal } from './ComponentPreviewModal'
-import { PAGE_COMPONENTS } from '@/components/page'
+import { PreviewModal } from './PreviewModal'
+import { PAGE_COMPONENTS, PAGE_ELEMENTS } from '@/components/page'
 
 interface EditModeToggleProps {
     templatePath?: string
@@ -103,8 +103,14 @@ export const EditModeToggle: React.FC<EditModeToggleProps> = ({ templatePath }) 
     }
 
     const handleComponentSelect = (componentKey: string) => {
+        // Check if it's a component or element
+        // CRITICAL: Always read defaultProps directly from registry - never modify them
+        // Text changes will be stored in templateContent, not in props
         const componentDef = PAGE_COMPONENTS[componentKey as keyof typeof PAGE_COMPONENTS]
-        const props = componentDef?.defaultProps || {}
+        const elementDef = PAGE_ELEMENTS[componentKey as keyof typeof PAGE_ELEMENTS]
+        const def = componentDef || elementDef
+        // Create a shallow copy to avoid mutating the original defaultProps
+        const props = def?.defaultProps ? { ...def.defaultProps } : {}
         addComponent(componentKey, props)
     }
 
@@ -188,7 +194,7 @@ export const EditModeToggle: React.FC<EditModeToggleProps> = ({ templatePath }) 
             </div>
 
             {/* Component Preview Modal */}
-            <ComponentPreviewModal
+            <PreviewModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onSelectComponent={handleComponentSelect}

@@ -146,7 +146,10 @@ export const ComponentPreview: React.FC<ComponentPreviewProps> = ({
               </div>
             ) : Component ? (
               <>
-                <Component {...defaultProps} />
+                {/* Override container width classes in preview modal */}
+                <div className="[&_.mx-auto]:mx-0 [&_.px-4]:px-0 [&_.max-w-screen-xl]:max-w-none [&_>_*]:w-full">
+                  <Component {...defaultProps} />
+                </div>
                 {/* Visual indicator for spacing components */}
                 {componentKey === 'spacing' && (
                   <div className="absolute inset-0 border-2 border-dashed border-gray-300 bg-gray-100/30 flex items-center justify-center pointer-events-none">

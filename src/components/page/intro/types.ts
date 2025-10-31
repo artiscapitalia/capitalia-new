@@ -9,5 +9,6 @@ export interface TemplateContent {
 export interface IntroProps {
   lang?: string
   contentOverrides?: TemplateContent
+  componentId?: string
 }
 

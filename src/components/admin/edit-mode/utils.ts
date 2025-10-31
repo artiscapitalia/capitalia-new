@@ -1,4 +1,4 @@
-import { PAGE_COMPONENTS } from '@/components/page'
+import { PAGE_COMPONENTS, PAGE_ELEMENTS } from '@/components/page'
 
 /**
  * Applies grayscale filter to a component preview container
@@ -37,5 +37,14 @@ export const shouldUseMultilineInput = (content: string): boolean => {
 export const getEditableComponents = () => {
   return Object.entries(PAGE_COMPONENTS).filter(
     ([, component]) => component.editable === true
+  )
+}
+
+/**
+ * Gets all editable elements from PAGE_ELEMENTS registry
+ */
+export const getEditableElements = () => {
+  return Object.entries(PAGE_ELEMENTS).filter(
+    ([, element]) => element.editable === true
   )
 }

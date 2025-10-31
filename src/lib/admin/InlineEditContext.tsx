@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { 
   TemplateContent, 
+  ElementProps,
   InlineEditContextType, 
   InlineEditProviderProps,
   AddedComponent
@@ -15,22 +16,26 @@ export const InlineEditProvider: React.FC<InlineEditProviderProps> = ({
   templatePath,
   initialContent = {},
   initialComponents = [],
+  initialElementProps = {},
   autoEnableEditMode = false
 }) => {
   const [isEditMode, setIsEditMode] = useState(autoEnableEditMode)
   const [templateContent, setTemplateContent] = useState<TemplateContent>(initialContent)
   const [addedComponents, setAddedComponents] = useState<AddedComponent[]>(initialComponents)
+  const [elementProps, setElementProps] = useState<ElementProps>(initialElementProps)
   
   // Use refs to track previous values for comparison and whether we've initialized
   const prevInitialContentRef = useRef<string>(JSON.stringify(initialContent))
   const prevInitialComponentsRef = useRef<string>(JSON.stringify(initialComponents))
+  const prevInitialElementPropsRef = useRef<string>(JSON.stringify(initialElementProps))
   const hasUserEditedRef = useRef<boolean>(false)
 
-  // Update state when initialContent or initialComponents change (e.g., after page refresh with new data)
+  // Update state when initialContent, initialComponents, or initialElementProps change (e.g., after page refresh with new data)
   // BUT only if user hasn't edited yet (to preserve user changes)
   useEffect(() => {
     const newContentStr = JSON.stringify(initialContent)
     const newComponentsStr = JSON.stringify(initialComponents)
+    const newElementPropsStr = JSON.stringify(initialElementProps)
     const currentContentStr = JSON.stringify(templateContent)
     
     // Only update from initialContent if:
@@ -56,7 +61,13 @@ export const InlineEditProvider: React.FC<InlineEditProviderProps> = ({
       prevInitialComponentsRef.current = newComponentsStr
       setAddedComponents(initialComponents)
     }
-  }, [initialContent, initialComponents, templateContent])
+
+    if (newElementPropsStr !== prevInitialElementPropsRef.current) {
+      console.log('[InlineEditProvider] InitialElementProps changed, updating elementProps')
+      prevInitialElementPropsRef.current = newElementPropsStr
+      setElementProps(initialElementProps)
+    }
+  }, [initialContent, initialComponents, initialElementProps, templateContent])
 
   const toggleEditMode = () => {
     setIsEditMode(!isEditMode)
@@ -76,6 +87,46 @@ export const InlineEditProvider: React.FC<InlineEditProviderProps> = ({
       console.log('[updateContent] Updated templateContent:', updated)
       return updated
     })
+  }
+
+  const updateProps = (componentId: string, propName: string, propValue: string | number | boolean) => {
+    hasUserEditedRef.current = true // Mark that user has edited
+    console.log('[updateProps] User edited props:', { componentId, propName, propValue })
+    setAddedComponents(prev => prev.map(comp => {
+      if (comp.id === componentId) {
+        return {
+          ...comp,
+          props: {
+            ...comp.props,
+            [propName]: propValue
+          }
+        }
+      }
+      return comp
+    }))
+  }
+
+  const updateElementProps = (componentId: string, elementId: string, propName: string, propValue: string | number | boolean) => {
+    hasUserEditedRef.current = true // Mark that user has edited
+    console.log('[updateElementProps] User edited element props:', { componentId, elementId, propName, propValue })
+    setElementProps(prev => {
+      const updated = {
+        ...prev,
+        [componentId]: {
+          ...prev[componentId],
+          [elementId]: {
+            ...prev[componentId]?.[elementId],
+            [propName]: propValue
+          }
+        }
+      }
+      console.log('[updateElementProps] Updated elementProps:', updated)
+      return updated
+    })
+  }
+
+  const getElementProps = (componentId: string, elementId: string): Record<string, string | number | boolean> => {
+    return elementProps[componentId]?.[elementId] || {}
   }
 
   const addComponent = (componentKey: string, props?: Record<string, unknown>) => {
@@ -147,6 +198,8 @@ export const InlineEditProvider: React.FC<InlineEditProviderProps> = ({
       templateContent,
       templateContentKeys: Object.keys(templateContent),
       addedComponents,
+      elementProps,
+      elementPropsKeys: Object.keys(elementProps),
       templateContentString: JSON.stringify(templateContent)
     })
 
@@ -154,7 +207,8 @@ export const InlineEditProvider: React.FC<InlineEditProviderProps> = ({
       const requestBody = {
         templatePath,
         content: templateContent,
-        addedComponents: addedComponents
+        addedComponents: addedComponents,
+        elementProps: elementProps
       }
       
       console.log('[saveTemplate] Request body:', JSON.stringify(requestBody, null, 2))
@@ -188,8 +242,12 @@ export const InlineEditProvider: React.FC<InlineEditProviderProps> = ({
         isEditMode,
         templateContent,
         addedComponents,
+        elementProps,
         toggleEditMode,
         updateContent,
+        updateProps,
+        updateElementProps,
+        getElementProps,
         addComponent,
         insertComponentBefore,
         insertComponentAfter,

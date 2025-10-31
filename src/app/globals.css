@@ -27,6 +27,12 @@ body {
   font-family: var(--font-open-sans), Arial, Helvetica, sans-serif;
 }
 
+/* Properties button arrow color change on hover */
+.properties-button-container:hover button:hover ~ .properties-button-arrow,
+.properties-button-container:has(button:hover) .properties-button-arrow {
+  border-top-color: #0158B3;
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-roboto-slab), "Roboto Slab", serif;
 }

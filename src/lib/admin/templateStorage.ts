@@ -4,7 +4,7 @@ import { existsSync } from 'fs'
 import React from 'react'
 import { InlineEditProvider } from '@/lib/admin/InlineEditContext'
 import { EditModeToggle, TemplateWrapper } from '@/components/admin/edit-mode'
-import { TemplateData, AddedComponent, TemplateContent } from '@/lib/admin/types'
+import { TemplateData, AddedComponent, TemplateContent, ElementProps } from '@/lib/admin/types'
 
 /**
  * Check if we're running on Vercel
@@ -112,7 +112,8 @@ function createComponentFromTemplateData(
                 key: componentKey,
                 templatePath: templateData.templatePath,
                 initialContent: templateData.contentOverrides,
-                initialComponents: templateData.addedComponents
+                initialComponents: templateData.addedComponents,
+                initialElementProps: templateData.elementProps || {}
             } as any,
             wrapperElement
         )
@@ -125,13 +126,15 @@ function createComponentFromTemplateData(
 export async function saveTemplateContent(
     templatePath: string,
     content: TemplateContent,
-    addedComponents: AddedComponent[]
+    addedComponents: AddedComponent[],
+    elementProps?: ElementProps
 ): Promise<void> {
     const templateData: TemplateData = {
         templatePath,
         className: getTemplateClassName(templatePath),
         contentOverrides: content,
-        addedComponents
+        addedComponents,
+        elementProps: elementProps || {}
     }
 
     const jsonContent = JSON.stringify(templateData, null, 2)

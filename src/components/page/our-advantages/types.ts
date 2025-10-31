@@ -16,4 +16,5 @@ export interface AdvantageItem {
 export interface OurAdvantagesProps {
   lang?: string
   contentOverrides?: TemplateContent
+  componentId?: string
 }

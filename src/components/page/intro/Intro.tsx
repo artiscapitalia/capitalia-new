@@ -1,23 +1,23 @@
 import React from 'react'
-import Link from 'next/link'
 import Image from 'next/image'
 import { EditableText } from '@/components/admin/edit-mode'
+import { Button } from '@/components/page/elements'
 import { IntroProps } from './types'
 
-export const Intro: React.FC<IntroProps> = ({ lang = 'lv' }) => {
+export const Intro: React.FC<IntroProps> = ({ lang = 'lv', componentId = 'intro' }) => {
     return (
         <div className="mx-auto px-4 max-w-screen-xl">
             <div className="relative">
                 <h1 className="text-gray-800 mb-16 font-serif after:content-[''] after:block after:w-[95px] after:h-[3px] after:bg-[#0172E3] after:relative after:top-10">
                     <EditableText 
-                        componentId="intro"
+                        componentId={componentId}
                         elementId="heading-line1"
                         defaultContent="Pieejams finansējums"
                         className="block"
                         tag="span"
                     />
                     <EditableText 
-                        componentId="intro"
+                        componentId={componentId}
                         elementId="heading-line2"
                         defaultContent="mazam un vidējam uzņēmumam"
                         className="block mt-2 text-capitalia-blue"
@@ -27,7 +27,7 @@ export const Intro: React.FC<IntroProps> = ({ lang = 'lv' }) => {
 
                 <div className="mb-[30px] mr-[250px] font-serif text-2xl font-light text-gray-600">
                     <EditableText 
-                        componentId="intro"
+                        componentId={componentId}
                         elementId="description"
                         defaultContent="Capitalia finansējums uzņēmumiem kalpo kā vienkāršs papildinājums vai alternatīva banku sniegtajiem aizdevumiem"
                         tag="div"
@@ -52,17 +52,15 @@ export const Intro: React.FC<IntroProps> = ({ lang = 'lv' }) => {
                     </div>
                 </div>
 
-                <Link
+                <Button
                     href={`/${lang}/apply-loan`}
-                    className="inline-block px-[18px] py-3 text-lg font-semibold text-white bg-[#1375e0] border border-[#1375e0] rounded no-underline outline-none"
-                >
-                    <EditableText 
-                        componentId="intro"
-                        elementId="button-text"
-                        defaultContent="Vēlos veicināt biznesa izaugsmi"
-                        tag="span"
-                    />
-                </Link>
+                    text="Vēlos veicināt biznesa izaugsmi"
+                    size="medium"
+                    componentId={componentId}
+                    elementId="button-text"
+                    elementKey="button"
+                    withContainer={false}
+                />
             </div>
         </div>
     )

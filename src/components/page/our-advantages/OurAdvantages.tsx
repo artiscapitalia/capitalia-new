@@ -1,6 +1,6 @@
 import React from 'react'
-import Link from 'next/link'
 import { EditableText } from '@/components/admin/edit-mode'
+import { Button } from '@/components/page/elements'
 import { OurAdvantagesProps } from './types'
 
 // SVG icons for each advantage
@@ -61,7 +61,7 @@ const TrustworthyIcon = () => (
   </svg>
 )
 
-export const OurAdvantages: React.FC<OurAdvantagesProps> = ({ lang = 'lv' }) => {
+export const OurAdvantages: React.FC<OurAdvantagesProps> = ({ lang = 'lv', componentId = 'our-advantages' }) => {
   const advantages = [
     {
       id: 'accessible',
@@ -88,7 +88,7 @@ export const OurAdvantages: React.FC<OurAdvantagesProps> = ({ lang = 'lv' }) => 
       <div className="w-full">
         <h2 className="text-black mb-2.5 text-[40px] font-semibold normal-case text-center">
           <EditableText 
-            componentId="our-advantages"
+            componentId={componentId}
             elementId="title"
             defaultContent="Mūsu priekšrocības"
             tag="span"
@@ -98,7 +98,7 @@ export const OurAdvantages: React.FC<OurAdvantagesProps> = ({ lang = 'lv' }) => 
           className="text-gray-600 py-0 px-20 text-xl text-center"
         >
           <EditableText 
-            componentId="our-advantages"
+            componentId={componentId}
             elementId="subtitle"
             defaultContent="Eiropas Savienībā licensēta finansējuma iestāde"
             tag="span"
@@ -122,7 +122,7 @@ export const OurAdvantages: React.FC<OurAdvantagesProps> = ({ lang = 'lv' }) => 
 
                     <h3 className="text-2xl font-semibold text-[#333] m-0 ml-4">
                       <EditableText 
-                        componentId="our-advantages"
+                        componentId={componentId}
                         elementId={`advantage-${advantage.id}-title`}
                         defaultContent={advantage.defaultTitle}
                         tag="span"
@@ -132,7 +132,7 @@ export const OurAdvantages: React.FC<OurAdvantagesProps> = ({ lang = 'lv' }) => 
 
                   <span className="text-[20px] text-[#5f5f5f] leading-[28px] block mt-2.5">
                     <EditableText 
-                      componentId="our-advantages"
+                      componentId={componentId}
                       elementId={`advantage-${advantage.id}-description`}
                       defaultContent={advantage.defaultDescription}
                       tag="span"
@@ -144,17 +144,15 @@ export const OurAdvantages: React.FC<OurAdvantagesProps> = ({ lang = 'lv' }) => 
           })}
         </div>
         <div className="text-center pt-10">
-          <Link
+          <Button
             href={`/${lang}/apply-loan`}
-            className="inline-block px-[18px] py-3 text-lg font-semibold text-white bg-[#1375e0] border border-[#1375e0] rounded no-underline outline-none"
-          >
-            <EditableText 
-              componentId="our-advantages"
-              elementId="button-text"
-              defaultContent="Kļūt par klientu"
-              tag="span"
-            />
-          </Link>
+            text="Kļūt par klientu"
+            size="medium"
+            componentId={componentId}
+            elementId="button-text"
+            elementKey="button"
+            withContainer={false}
+          />
         </div>
       </div>
     </div>

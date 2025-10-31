@@ -3,16 +3,22 @@
 import React, { useState } from 'react'
 import { useInlineEdit } from '@/lib/admin/InlineEditContext'
 import { PlusIcon } from '@heroicons/react/24/outline'
-import { PAGE_COMPONENTS } from '@/components/page'
-import { ComponentPreviewModal } from './ComponentPreviewModal'
+import { PAGE_COMPONENTS, PAGE_ELEMENTS } from '@/components/page'
+import { PreviewModal } from './PreviewModal'
 
 export const AddComponentPlaceholder: React.FC = () => {
   const { isEditMode, addComponent } = useInlineEdit()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const handleComponentSelect = (componentKey: string) => {
+    // Check if it's a component or element
+    // CRITICAL: Always read defaultProps directly from registry - never modify them
+    // Text changes will be stored in templateContent, not in props
     const componentDef = PAGE_COMPONENTS[componentKey as keyof typeof PAGE_COMPONENTS]
-    const props = componentDef?.defaultProps || {}
+    const elementDef = PAGE_ELEMENTS[componentKey as keyof typeof PAGE_ELEMENTS]
+    const def = componentDef || elementDef
+    // Create a shallow copy to avoid mutating the original defaultProps
+    const props = def?.defaultProps ? { ...def.defaultProps } : {}
     addComponent(componentKey, props)
   }
 
@@ -40,7 +46,7 @@ export const AddComponentPlaceholder: React.FC = () => {
       </div>
 
       {/* Component Preview Modal */}
-      <ComponentPreviewModal
+      <PreviewModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSelectComponent={handleComponentSelect}

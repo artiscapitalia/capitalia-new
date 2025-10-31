@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { saveTemplateContent } from '@/lib/admin/templateStorage'
-import { AddedComponent } from '@/lib/admin/types'
+import { AddedComponent, ElementProps } from '@/lib/admin/types'
 
 interface SaveTemplateRequest {
   templatePath: string
@@ -11,18 +11,20 @@ interface SaveTemplateRequest {
     }
   }
   addedComponents?: AddedComponent[]
+  elementProps?: ElementProps
 }
 
 export async function POST(request: NextRequest) {
   try {
     const requestData: SaveTemplateRequest = await request.json()
-    const { templatePath, content, addedComponents = [] } = requestData
+    const { templatePath, content, addedComponents = [], elementProps = {} } = requestData
 
     console.log('[save/route] Received request data:', {
       templatePath,
       contentKeys: content ? Object.keys(content) : [],
       content: content,
       addedComponentsCount: addedComponents?.length || 0,
+      elementPropsKeys: elementProps ? Object.keys(elementProps) : [],
       requestBodyPreview: JSON.stringify(requestData).substring(0, 200)
     })
 
@@ -37,7 +39,7 @@ export async function POST(request: NextRequest) {
     try {
       // Save using hybrid storage (saves as JSON)
       console.log('[save/route] Saving template to storage, path:', templatePath, 'content:', JSON.stringify(content).substring(0, 200))
-      await saveTemplateContent(templatePath, content, addedComponents)
+      await saveTemplateContent(templatePath, content, addedComponents, elementProps)
       console.log('[save/route] Template saved successfully')
 
       // Note: waitForBlobAvailable() is now called inside saveTemplateContent()

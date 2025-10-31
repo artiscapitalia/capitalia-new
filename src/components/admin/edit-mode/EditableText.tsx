@@ -19,6 +19,8 @@ export const EditableText: React.FC<EditableTextProps> = ({
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
 
   // Get content from template or use default
+  // CRITICAL: Never modify defaultContent - it always comes from the component/element definition
+  // Text changes are stored in templateContent and saved to template file, but defaultContent remains unchanged
   const currentContent = templateContent[componentId]?.[elementId] || defaultContent
 
   useEffect(() => {

@@ -17,6 +17,9 @@ export type {
     ComponentEditEvent,
 } from './types';
 
+// Prop definition exports
+export type { PropDefinition } from '@/lib/admin/types';
+
 // Component registry for the page builder
 export const PAGE_COMPONENTS = {
     header: {
@@ -38,6 +41,7 @@ export const PAGE_COMPONENTS = {
         defaultProps: {
             lang: 'lv',
         },
+        props: [],
     },
     'our-advantages': {
         name: 'OurAdvantages',
@@ -48,6 +52,7 @@ export const PAGE_COMPONENTS = {
         defaultProps: {
             lang: 'lv',
         },
+        props: [],
     },
     spacing: {
         name: 'Spacing',
@@ -58,5 +63,35 @@ export const PAGE_COMPONENTS = {
         defaultProps: {
             height: 40,
         },
+        props: [],
+    },
+} as const;
+
+// Element registry for the page builder
+export const PAGE_ELEMENTS = {
+    button: {
+        name: 'Button',
+        description: 'Reusable button element with customizable size and text',
+        component: () => import('./elements/button'),
+        category: 'interactive',
+        editable: true,
+        defaultProps: {
+            text: 'Button text here',
+            size: 'medium',
+        },
+        props: [
+            {
+                name: 'size',
+                label: 'Size',
+                type: 'select',
+                values: [
+                    { value: 'small', label: 'Small' },
+                    { value: 'medium', label: 'Medium' },
+                    { value: 'large', label: 'Large' },
+                ],
+                defaultValue: 'medium',
+                description: 'Button size variant',
+            },
+        ],
     },
 } as const;
